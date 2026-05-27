@@ -4718,7 +4718,11 @@ async function dtLoadFromGH() {
   try {
     const res = await fetch(
       `https://api.github.com/repos/${DT_GH_REPO}/contents/${DT_GH_FILE}?ref=${DT_GH_BRANCH}&t=${Date.now()}`,
-      { headers: { Authorization: `token ${DT_GH_TOKEN}`, Accept: 'application/vnd.github.v3+json' } }
+      { headers: {
+        Authorization: `Bearer ${DT_GH_TOKEN}`, // Změna na Bearer
+        Accept: 'application/vnd.github+json',   // Oficiální GitHub media type
+        'Content-Type': 'application/json'
+      }, }
     );
     if (res.status === 404) {
       // Soubor ještě neexistuje — začneme s prázdnými daty, uloží se při první změně
@@ -4760,8 +4764,8 @@ async function dtSaveToGH() {
       {
         method: 'PUT',
         headers: {
-          Authorization: `token ${DT_GH_TOKEN}`,
-          Accept: 'application/vnd.github.v3+json',
+          Authorization: `Bearer ${DT_GH_TOKEN}`,
+          Accept: 'application/vnd.github+json',
           'Content-Type': 'application/json'
         },
         body: JSON.stringify(body)
@@ -4774,7 +4778,7 @@ async function dtSaveToGH() {
       // SHA conflict — načti aktuální SHA a zkus znovu
       const meta = await fetch(
         `https://api.github.com/repos/${DT_GH_REPO}/contents/${DT_GH_FILE}?ref=${DT_GH_BRANCH}`,
-        { headers: { Authorization: `token ${DT_GH_TOKEN}` } }
+        { headers: { Authorization: `Bearer ${DT_GH_TOKEN}` } }
       ).then(r => r.json()).catch(() => null);
       if (meta?.sha) { dtFileSha = meta.sha; dtSaveToGH(); }
     }
