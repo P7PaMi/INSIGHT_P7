@@ -4701,16 +4701,9 @@ const DT_TGT = {
 // Data se ukládají jako soubor data/denni_tabulka.json přímo do
 // repozitáře p7pami/INSIGHT_P7 přes GitHub Contents API.
 //
-// NASTAVENÍ — jednou proveď tyto kroky:
-//   1. Jdi na https://github.com/settings/tokens/new
-//   2. Vyber "Classic token", pojmenuj ho např. "INSIGHT-P7-data"
-//   3. Zaškrtni POUZE scope: "repo" (nebo jen "public_repo" pokud je repo veřejné)
-//   4. Klikni Generate token a zkopíruj ho
-//   5. Vlož token na místo 'VLOZ_SVUJ_TOKEN_ZDE' níže
-//   6. Nahraj soubor do repozitáře — data se začnou automaticky ukládat
 // ══════════════════════════════════════════════════════════════════
 const DT_GH_TOKEN  = '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';   // ← GitHub PAT token
-const DT_GH_REPO   = 'p7pami/INSIGHT_P7';      // vlastník/repozitář
+const DT_GH_REPO   = 'P7PaMi/INSIGHT_P7';      // vlastník/repozitář
 const DT_GH_FILE   = 'data/denni_tabulka.json'; // cesta k datovému souboru
 const DT_GH_BRANCH = 'main';                    // větev (main nebo master)
 
