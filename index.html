@@ -1141,7 +1141,7 @@
     overflow-x: hidden;
     position: relative;
   }
-  #view-denni-tabulka {
+  #view-low-performance {
     overflow-x: auto !important;
   }
 
@@ -1761,9 +1761,9 @@
 
     <div class="sidebar-section">
       <div class="sidebar-section-label">TL</div>
-      <div class="sidebar-item" id="sbi-denni-tabulka" onclick="sidebarNav('denni-tabulka')">
+      <div class="sidebar-item" id="sbi-low-performance" onclick="sidebarNav('low-performance')">
         <span class="sidebar-icon">▦</span>
-        <span class="sidebar-label">Denní tabulka</span>
+        <span class="sidebar-label">Low Performance</span>
       </div>
     </div>
 
@@ -1869,9 +1869,9 @@
     </div>
     <div class="home-section-label">TL</div>
     <div class="home-cards">
-      <div class="home-card" onclick="sidebarNav('denni-tabulka')">
+      <div class="home-card" onclick="sidebarNav('low-performance')">
         <div class="home-card-icon">▦</div>
-        <div class="home-card-title">Denní tabulka</div>
+        <div class="home-card-title">Low Performance</div>
         <div class="home-card-desc">Přehled denních ukazatelů pobočky s plněním po hodinách.</div>
       </div>
     </div>
@@ -4050,6 +4050,7 @@ function asrtgtExport() {
 
 // ===== DOCUMENTATION =====
 function openDoc() {
+  ['view-home','view-branch','view-users','view-dochazka','view-links','view-kalkulacka','view-asrtgt','view-lunch','view-low-performance'].forEach(id => { const el = document.getElementById(id); if (el) el.style.display = 'none'; });
   document.getElementById('doc-view').style.display = 'flex';
   if (window._docObserverInit) window._docObserverInit();
   document.body.style.overflow = 'hidden';
@@ -4121,7 +4122,7 @@ function sidebarNav(section) {
   });
 
   // Hide all views
-  ['view-home','view-branch','view-users','view-dochazka','view-links','view-kalkulacka','view-asrtgt','view-lunch','view-denni-tabulka']
+  ['view-home','view-branch','view-users','view-dochazka','view-links','view-kalkulacka','view-asrtgt','view-lunch','view-low-performance']
     .forEach(id => { const el = document.getElementById(id); if (el) el.style.display = 'none'; });
 
   // Nav tabs hidden (no longer in nav bar)
@@ -4150,8 +4151,8 @@ function sidebarNav(section) {
     if (di && !di.value) di.value = new Date().toISOString().slice(0,10);
     if (lunchSlots.length === 0) lunchSlots = lunchDefaultSlots();
     lunchInit();
-  } else if (section === 'denni-tabulka') {
-    document.getElementById('view-denni-tabulka').style.display = 'block';
+  } else if (section === 'low-performance') {
+    document.getElementById('view-low-performance').style.display = 'block';
     dtInit();
   }
 }
@@ -4747,7 +4748,7 @@ async function lunchExport() {
     <a class="doc-nav-link" href="#planovac-obedu">Plánovač obědů</a>
     <a class="doc-nav-link" href="#kalkulacka">Kalkulačka provizí</a>
     <a class="doc-nav-link" href="#asrtgt">Úprava ASR TGT</a>
-    <a class="doc-nav-link" href="#denni-tabulka">Denní tabulka</a>
+    <a class="doc-nav-link" href="#low-performance">Low Performance</a>
     <a class="doc-nav-link" href="#odkazy">Důležité odkazy</a>
   </div>
 
@@ -4781,7 +4782,7 @@ async function lunchExport() {
       <span class="doc-hero-tag">Plánovač obědů</span>
       <span class="doc-hero-tag">Kalkulačka</span>
       <span class="doc-hero-tag">ASR TGT</span>
-      <span class="doc-hero-tag">Denní tabulka</span>
+      <span class="doc-hero-tag">Low Performance</span>
       <span class="doc-hero-tag">Odkazy</span>
       <span class="doc-hero-tag">v.1.1</span>
     </div>
@@ -4825,11 +4826,11 @@ async function lunchExport() {
       <div class="callout-icon">🆕</div>
       <div class="callout-body">
         <strong>Změny v aktualizaci v.1.1:</strong><br>
-        • <strong>Denní tabulka</strong> — Odkaz na denní tabulku, určenou ke sledování výkonu po hodinách<br>
-        • <strong>Sidebar — nová kategorie TL</strong> — přidána sekce TL mezi Výkon a Ostatní. Obsahuje Denní tabulku.<br>
+        • <strong>Low Performance</strong> — Odkaz na Low Performance, určenou ke sledování výkonu po hodinách<br>
+        • <strong>Sidebar — nová kategorie TL</strong> — přidána sekce TL mezi Výkon a Ostatní. Obsahuje Low Performance.<br>
         • <strong>Sidebar — ikonky Branch / Individual</strong> — podsekce Branch a Individual mají nyní odlišné ikonky (◫ a 👤) místo šipek.<br>
         • <strong>Důležité odkazy — sekce Pro TL</strong> — přidána nová kategorie s odkazy InsightSofa (NPS), OLAP (PowerBI) a Asana.<br>
-        • <strong>Hlavní stránka</strong> — přidána karta Denní tabulka v sekci TL.
+        • <strong>Hlavní stránka</strong> — přidána karta Low Performance v sekci TL.
       </div>
     </div>
   </section>
@@ -4916,7 +4917,7 @@ async function lunchExport() {
       <thead><tr><th>Skupina</th><th>Sekce</th></tr></thead>
       <tbody>
         <tr><td>Výkon</td><td><strong>Performance</strong> — výkonnostní přehledy poboček a lidí<br><strong>Docházka</strong> — směnový plán (dostupné jen po nahrání Dochazka.xlsx)<br><strong>Denní TGT</strong> — v přípravě, zatím nedostupné</td></tr>
-        <tr><td>TL</td><td><strong>Denní tabulka</strong> — Tabulka denního plnění</td></tr>
+        <tr><td>TL</td><td><strong>Low Performance</strong> — Tabulka denního plnění</td></tr>
         <tr><td>Ostatní</td><td><strong>Důležité odkazy</strong> — rychlý přístup k dalším nástrojům<br><strong>Kalkulačka provizí</strong> — výpočet provize pro zaměstnance<br><strong>Úprava ASR TGT</strong> — přepočet cíle pro zaměstnance na jiných pozicích</td></tr>
       </tbody>
     </table>
@@ -5325,11 +5326,11 @@ async function lunchExport() {
 
 
   <!-- ═══════════════════════════════════════════════ -->
-  <!-- SECTION: DENNÍ TABULKA -->
+  <!-- SECTION: LOW PERFORMANCE -->
   <!-- ═══════════════════════════════════════════════ -->
-  <section class="doc-section" id="denni-tabulka">
+  <section class="doc-section" id="low-performance">
     <div class="section-eyebrow">11 · TL nástroje</div>
-    <div class="section-title">Denní tabulka</div>
+    <div class="section-title">Low Performance</div>
     <div class="section-lead">
       Tabulka pro sledování denního plnění klíčových ukazatelů pobočky v průběhu dne.
     </div>
