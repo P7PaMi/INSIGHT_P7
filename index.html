@@ -4696,60 +4696,102 @@ const DT_TGT = {
   'asr-p7':             3555,
 };
 
-// ── GITHUB GIST PERSISTENCE ──
-// Stores data as a public Gist so all users share the same state.
-// Gist ID is stored in localStorage for continuity; if none exists, a new one is created.
-const DT_GIST_FILENAME = 'insight_p7_denni_tabulka.json';
-let dtGistId = localStorage.getItem('dt_gist_id') || null;
-let dtSaveTimer = null;
+// ══════════════════════════════════════════════════════════════════
+// GITHUB PERSISTENCE
+// Data se ukládají jako soubor data/denni_tabulka.json přímo do
+// repozitáře p7pami/INSIGHT_P7 přes GitHub Contents API.
+//
+// NASTAVENÍ — jednou proveď tyto kroky:
+//   1. Jdi na https://github.com/settings/tokens/new
+//   2. Vyber "Classic token", pojmenuj ho např. "INSIGHT-P7-data"
+//   3. Zaškrtni POUZE scope: "repo" (nebo jen "public_repo" pokud je repo veřejné)
+//   4. Klikni Generate token a zkopíruj ho
+//   5. Vlož token na místo 'VLOZ_SVUJ_TOKEN_ZDE' níže
+//   6. Nahraj soubor do repozitáře — data se začnou automaticky ukládat
+// ══════════════════════════════════════════════════════════════════
+const DT_GH_TOKEN  = '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';   // ← GitHub PAT token
+const DT_GH_REPO   = 'p7pami/INSIGHT_P7';      // vlastník/repozitář
+const DT_GH_FILE   = 'data/denni_tabulka.json'; // cesta k datovému souboru
+const DT_GH_BRANCH = 'main';                    // větev (main nebo master)
 
-async function dtLoadFromGist() {
-  if (!dtGistId) { dtInitEmpty(); return; }
+let dtSaveTimer  = null;
+let dtFileSha    = null; // SHA posledního commitu souboru — nutné pro PUT
+
+async function dtLoadFromGH() {
+  if (!DT_GH_TOKEN || DT_GH_TOKEN === 'VLOZ_SVUJ_TOKEN_ZDE') {
+    console.warn('[INSIGHT] GitHub token není nastaven — data se neukládají.');
+    dtInitEmpty(); return;
+  }
   try {
-    const res = await fetch(`https://api.github.com/gists/${dtGistId}`, { cache: 'no-store' });
-    if (!res.ok) { dtGistId = null; localStorage.removeItem('dt_gist_id'); dtInitEmpty(); return; }
-    const gist = await res.json();
-    const content = gist.files?.[DT_GIST_FILENAME]?.content;
-    if (content) {
-      const parsed = JSON.parse(content);
-      dtData = parsed;
+    const res = await fetch(
+      `https://api.github.com/repos/${DT_GH_REPO}/contents/${DT_GH_FILE}?ref=${DT_GH_BRANCH}&t=${Date.now()}`,
+      { headers: { Authorization: `token ${DT_GH_TOKEN}`, Accept: 'application/vnd.github.v3+json' } }
+    );
+    if (res.status === 404) {
+      // Soubor ještě neexistuje — začneme s prázdnými daty, uloží se při první změně
+      dtInitEmpty(); return;
     }
-  } catch(e) { /* network error — just use empty */ }
-  // Ensure all rows have entries
+    if (!res.ok) { dtInitEmpty(); return; }
+    const meta = await res.json();
+    dtFileSha = meta.sha;
+    const decoded = JSON.parse(atob(meta.content.replace(/\n/g, '')));
+    if (decoded && typeof decoded === 'object') {
+      DT_ROWS.forEach(r => { if (decoded[r.id]) dtData[r.id] = decoded[r.id]; });
+    }
+  } catch(e) {
+    console.warn('[INSIGHT] Chyba při načítání dat z GitHubu:', e);
+  }
   DT_ROWS.forEach(r => {
     if (!dtData[r.id]) dtData[r.id] = { h12: '', h14: '', h16: '', h18: '', h20: '' };
   });
   dtRender();
 }
 
-async function dtSaveToGist() {
-  const body = JSON.stringify(dtData, null, 2);
-  const payload = { files: { [DT_GIST_FILENAME]: { content: body } } };
+async function dtSaveToGH() {
+  if (!DT_GH_TOKEN || DT_GH_TOKEN === 'VLOZ_SVUJ_TOKEN_ZDE') return;
+  const payload = {};
+  DT_ROWS.forEach(r => { payload[r.id] = dtData[r.id]; });
+  const contentB64 = btoa(unescape(encodeURIComponent(JSON.stringify(payload, null, 2))));
+  const body = {
+    message: 'chore: update denni tabulka data',
+    content: contentB64,
+    branch: DT_GH_BRANCH,
+    ...(dtFileSha ? { sha: dtFileSha } : {})
+  };
   try {
-    if (dtGistId) {
-      await fetch(`https://api.github.com/gists/${dtGistId}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
-      });
-    } else {
-      const res = await fetch('https://api.github.com/gists', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ...payload, public: true, description: 'INSIGHT P7 Denní tabulka data' })
-      });
-      if (res.ok) {
-        const gist = await res.json();
-        dtGistId = gist.id;
-        localStorage.setItem('dt_gist_id', dtGistId);
+    const res = await fetch(
+      `https://api.github.com/repos/${DT_GH_REPO}/contents/${DT_GH_FILE}`,
+      {
+        method: 'PUT',
+        headers: {
+          Authorization: `token ${DT_GH_TOKEN}`,
+          Accept: 'application/vnd.github.v3+json',
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(body)
       }
+    );
+    if (res.ok) {
+      const data = await res.json();
+      dtFileSha = data.content?.sha ?? dtFileSha; // aktualizuj SHA pro příští uložení
+    } else {
+      // SHA conflict — načti aktuální SHA a zkus znovu
+      const meta = await fetch(
+        `https://api.github.com/repos/${DT_GH_REPO}/contents/${DT_GH_FILE}?ref=${DT_GH_BRANCH}`,
+        { headers: { Authorization: `token ${DT_GH_TOKEN}` } }
+      ).then(r => r.json()).catch(() => null);
+      if (meta?.sha) { dtFileSha = meta.sha; dtSaveToBin(); }
     }
   } catch(e) { /* silently fail */ }
 }
 
+// Aliases so rest of code stays consistent
+const dtSaveToBin   = dtSaveToGH;
+const dtLoadFromBin = dtLoadFromGH;
+
 function dtScheduleSave() {
   clearTimeout(dtSaveTimer);
-  dtSaveTimer = setTimeout(dtSaveToGist, 1200);
+  dtSaveTimer = setTimeout(dtSaveToGH, 1500);
 }
 
 // User-entered data: { rowId: { h12:'', h14:'', h16:'', h18:'', h20:'' } }
@@ -4766,7 +4808,7 @@ function dtInit() {
   DT_ROWS.forEach(r => {
     if (!dtData[r.id]) dtData[r.id] = { h12: '', h14: '', h16: '', h18: '', h20: '' };
   });
-  dtLoadFromGist();
+  dtLoadFromBin();
 }
 
 // ── Formatting helpers ──
@@ -4974,20 +5016,17 @@ function dtRender() {
           pClr = muted;
         }
 
-        // Value cell background:
-        // noValueBg rows → same as rowBg (auto color styling), others → accentBgHex for editable
-        let valueCellBg;
-        if (isAuto) {
-          valueCellBg = r.noValueBg ? rowBg : (displayVal ? autoBgHex : rowBg);
-        } else {
-          valueCellBg = accentBgHex;
-        }
+        // Value cell background rules:
+        // - noValueBg auto rows (ARoS, ASR): always rowBg — NO color on value cell
+        // - other auto rows: always rowBg — consistent with above (no tint on value)
+        // - editable rows: always accentBgHex (blue tint input bg) — NO fill/pct color on value
+        // Only pct cell gets colored based on fulfillment.
+        const valueCellBg = isAuto ? rowBg : accentBgHex;
 
         // Value cell
         if (isAuto) {
           const autoVal = displayVal || '';
-          const autoTextColor = r.noValueBg ? (autoVal ? autoColor : muted) : (autoVal ? autoColor : muted);
-          bHtml += `<td style="padding:9px 12px; font-size:12px; font-weight:600; color:${autoTextColor}; border:1px solid ${border}; background:${valueCellBg}; text-align:right; white-space:nowrap;">${autoVal || '—'}</td>`;
+          bHtml += `<td style="padding:9px 12px; font-size:12px; font-weight:600; color:${autoVal ? autoColor : muted}; border:1px solid ${border}; background:${valueCellBg}; text-align:right; white-space:nowrap;">${autoVal || '—'}</td>`;
         } else {
           const shownVal = displayVal || '';
           bHtml += `<td style="padding:0; border:1px solid ${border}; background:${accentBgHex}; text-align:right; min-width:90px;">
