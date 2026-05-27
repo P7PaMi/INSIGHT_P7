@@ -1676,7 +1676,7 @@
         <span class="sidebar-label">Branch</span>
       </div>
       <div class="sidebar-subitem" id="sbi-individual" onclick="sidebarNav('individual')" style="display:none">
-        <span style="font-size:11px;">👤</span>
+        <span style="font-size:11px;">◉</span>
         <span class="sidebar-label">Individual</span>
       </div>
       <div class="sidebar-item" id="sbi-dochazka" onclick="sidebarNav('dochazka')">
@@ -1697,7 +1697,7 @@
     <div class="sidebar-section">
       <div class="sidebar-section-label">TL</div>
       <div class="sidebar-item" id="sbi-denni-tabulka" onclick="sidebarNav('denni-tabulka')">
-        <span class="sidebar-icon">📅</span>
+        <span class="sidebar-icon">▦</span>
         <span class="sidebar-label">Denní tabulka</span>
       </div>
     </div>
@@ -1769,7 +1769,7 @@
     <div class="home-section-label">Výkon</div>
     <div class="home-cards">
       <div class="home-card primary" onclick="sidebarNav('individual')">
-        <div class="home-card-icon">👤</div>
+        <div class="home-card-icon">◉</div>
         <div class="home-card-title">Individual Performance</div>
         <div class="home-card-desc">Výkon jednotlivých zaměstnanců — plnění ASR, obraty, share služeb.</div>
       </div>
@@ -1805,7 +1805,7 @@
     <div class="home-section-label">TL</div>
     <div class="home-cards">
       <div class="home-card" onclick="sidebarNav('denni-tabulka')">
-        <div class="home-card-icon">📅</div>
+        <div class="home-card-icon">▦</div>
         <div class="home-card-title">Denní tabulka</div>
         <div class="home-card-desc">Přehled denních ukazatelů pobočky s plněním po hodinách.</div>
       </div>
@@ -4663,18 +4663,23 @@ async function lunchExport() {
 // auto: function name string for auto-computed rows
 // fmt: 'kc' | 'num' | 'num1' | 'pct2' | 'dash'
 // hasPct: whether to show plnění %
+// invertPct: true = lower % is better (MED, HD)
+// noValueBg: true = don't color the value cell (ARoS TGT, ASR P7) — only color pct cell
 const DT_ROWS = [
-  { id: 'asist-obrat-celkem', label: 'Asistovaný Obrat Celkem', fmt: 'kc',   hasPct: true,  editable: true  },
-  { id: 'asist-obrat-sluzby', label: 'Asistovaný Obrat Služby', fmt: 'kc',   hasPct: true,  editable: true  },
-  { id: 'cct-tgt',            label: 'CCT TGT',                 fmt: 'num',  hasPct: true,  editable: true  },
-  { id: 'nps-smajlici',       label: 'NPS Smajlíci',            fmt: 'num',  hasPct: true,  editable: true  },
-  { id: 'aros-tgt',           label: 'ARos TGT',                fmt: 'pct2', hasPct: true,  editable: false, auto: 'aros' },
-  { id: 'obrat-celkem',       label: 'Obrat celkem',            fmt: 'kc',   hasPct: false, editable: true  },
-  { id: 'med',                label: 'MED',                     fmt: 'num1', hasPct: true,  editable: true  },
-  { id: 'hd',                 label: 'HD',                      fmt: 'num1', hasPct: true,  editable: true  },
-  { id: 'doklady',            label: 'Doklady',                 fmt: 'dash', hasPct: false, editable: true  },
-  { id: 'asr-p7',             label: 'ASR P7',                  fmt: 'kc',   hasPct: true,  editable: false, auto: 'asr'  },
-  { id: 'pocet-hodin',        label: 'počet hodin celkem',      fmt: 'num',  hasPct: false, editable: true  },
+  // ── Číselné ──
+  { id: 'asist-obrat-celkem', label: 'Asistovaný Obrat Celkem', fmt: 'kc',   hasPct: true,  editable: true,  category: 'Číselné'  },
+  { id: 'asist-obrat-sluzby', label: 'Asistovaný Obrat Služby', fmt: 'kc',   hasPct: true,  editable: true,  category: 'Číselné'  },
+  { id: 'obrat-celkem',       label: 'Obrat Celkem',            fmt: 'kc',   hasPct: false, editable: true,  category: 'Číselné'  },
+  { id: 'aros-tgt',           label: 'ARos TGT',                fmt: 'pct2', hasPct: true,  editable: false, auto: 'aros', noValueBg: true, category: 'Číselné' },
+  { id: 'asr-p7',             label: 'ASR P7',                  fmt: 'kc',   hasPct: true,  editable: false, auto: 'asr',  noValueBg: true, category: 'Číselné' },
+  // ── Výdej ──
+  { id: 'med',                label: 'MED',                     fmt: 'num1', hasPct: true,  editable: true,  invertPct: true,  category: 'Výdej'    },
+  { id: 'hd',                 label: 'HD',                      fmt: 'num1', hasPct: true,  editable: true,  invertPct: true,  category: 'Výdej'    },
+  { id: 'doklady',            label: 'Doklady',                 fmt: 'dash', hasPct: false, editable: true,  category: 'Výdej'    },
+  // ── Ostatní ──
+  { id: 'cct-tgt',            label: 'CCT',                     fmt: 'num',  hasPct: true,  editable: true,  category: 'Ostatní'  },
+  { id: 'nps-smajlici',       label: 'NPS Smajlíci',            fmt: 'num',  hasPct: true,  editable: true,  category: 'Ostatní'  },
+  { id: 'pocet-hodin',        label: 'Počet hodin celkem',      fmt: 'num',  hasPct: false, editable: true,  category: 'Ostatní'  },
 ];
 const DT_HOURS = ['12h', '14h', '16h', '18h', '20h'];
 const DT_HKEYS = ['h12', 'h14', 'h16', 'h18', 'h20'];
@@ -4691,16 +4696,77 @@ const DT_TGT = {
   'asr-p7':             3555,
 };
 
+// ── GITHUB GIST PERSISTENCE ──
+// Stores data as a public Gist so all users share the same state.
+// Gist ID is stored in localStorage for continuity; if none exists, a new one is created.
+const DT_GIST_FILENAME = 'insight_p7_denni_tabulka.json';
+let dtGistId = localStorage.getItem('dt_gist_id') || null;
+let dtSaveTimer = null;
+
+async function dtLoadFromGist() {
+  if (!dtGistId) { dtInitEmpty(); return; }
+  try {
+    const res = await fetch(`https://api.github.com/gists/${dtGistId}`, { cache: 'no-store' });
+    if (!res.ok) { dtGistId = null; localStorage.removeItem('dt_gist_id'); dtInitEmpty(); return; }
+    const gist = await res.json();
+    const content = gist.files?.[DT_GIST_FILENAME]?.content;
+    if (content) {
+      const parsed = JSON.parse(content);
+      dtData = parsed;
+    }
+  } catch(e) { /* network error — just use empty */ }
+  // Ensure all rows have entries
+  DT_ROWS.forEach(r => {
+    if (!dtData[r.id]) dtData[r.id] = { h12: '', h14: '', h16: '', h18: '', h20: '' };
+  });
+  dtRender();
+}
+
+async function dtSaveToGist() {
+  const body = JSON.stringify(dtData, null, 2);
+  const payload = { files: { [DT_GIST_FILENAME]: { content: body } } };
+  try {
+    if (dtGistId) {
+      await fetch(`https://api.github.com/gists/${dtGistId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+    } else {
+      const res = await fetch('https://api.github.com/gists', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ...payload, public: true, description: 'INSIGHT P7 Denní tabulka data' })
+      });
+      if (res.ok) {
+        const gist = await res.json();
+        dtGistId = gist.id;
+        localStorage.setItem('dt_gist_id', dtGistId);
+      }
+    }
+  } catch(e) { /* silently fail */ }
+}
+
+function dtScheduleSave() {
+  clearTimeout(dtSaveTimer);
+  dtSaveTimer = setTimeout(dtSaveToGist, 1200);
+}
+
 // User-entered data: { rowId: { h12:'', h14:'', h16:'', h18:'', h20:'' } }
 let dtData = {};
 
-function dtInit() {
+function dtInitEmpty() {
   DT_ROWS.forEach(r => {
-    if (!dtData[r.id]) {
-      dtData[r.id] = { h12: '', h14: '', h16: '', h18: '', h20: '' };
-    }
+    if (!dtData[r.id]) dtData[r.id] = { h12: '', h14: '', h16: '', h18: '', h20: '' };
   });
   dtRender();
+}
+
+function dtInit() {
+  DT_ROWS.forEach(r => {
+    if (!dtData[r.id]) dtData[r.id] = { h12: '', h14: '', h16: '', h18: '', h20: '' };
+  });
+  dtLoadFromGist();
 }
 
 // ── Formatting helpers ──
@@ -4818,13 +4884,12 @@ function dtRender() {
   const border    = isDark ? '#252830'   : '#d8dae3';
   const text      = isDark ? '#dde0ea'   : '#1a1d2e';
   const muted     = isDark ? '#6b7390'   : '#5a607a';
+  const dim       = isDark ? '#3a3f52'   : '#9098b2';
   const accent    = isDark ? '#5b6af5'   : '#4a5ae8';
-  // Input bg must NOT be transparent — give it the exact cell color so no white box
-  const accentBgHex = isDark ? '#141828' : '#f0f1fc'; // darkened accent tint as solid
+  const accentBgHex = isDark ? '#141828' : '#f0f1fc';
   const autoColor = isDark ? '#38c9b0'   : '#1a9e8a';
-  const autoBgHex = isDark ? '#0f1d1b'   : '#eaf6f4'; // solid tint for auto cells
+  const autoBgHex = isDark ? '#0f1d1b'   : '#eaf6f4';
 
-  // ── Styles ──
   const thBase  = `padding:8px 12px; font-size:10px; font-weight:700; letter-spacing:0.1em; text-transform:uppercase; color:${muted}; border:1px solid ${border}; background:${surface3}; white-space:nowrap;`;
   const inputSt = `display:block; width:100%; padding:9px 12px; box-sizing:border-box; border:none; outline:none; font-weight:700; font-size:12px; font-family:Helvetica,Arial,sans-serif; text-align:right; color:${accent}; background:${accentBgHex};`;
 
@@ -4838,65 +4903,115 @@ function dtRender() {
   hHtml += '</tr>';
   thead.innerHTML = hHtml;
 
-  // ── Body ──
+  // ── Body with category separators ──
+  const categories = ['Číselné', 'Výdej', 'Ostatní'];
   let bHtml = '';
-  DT_ROWS.forEach((r, ri) => {
-    const isAuto = !!r.auto;
-    const rowBg  = ri % 2 === 0 ? rowEven : rowOdd;
+  let globalRowIdx = 0; // for alternating bg
 
-    bHtml += `<tr>`;
+  categories.forEach(cat => {
+    const catRows = DT_ROWS.filter(r => r.category === cat);
+    if (!catRows.length) return;
 
-    // Label
-    bHtml += `<td style="padding:9px 14px; font-size:12px; font-weight:600; color:${text}; border:1px solid ${border}; background:${rowBg}; white-space:nowrap; text-align:left;">${r.label}</td>`;
+    // Category header row
+    const colCount = 2 + DT_HOURS.length * 2;
+    bHtml += `<tr>
+      <td colspan="${colCount}" style="padding:6px 14px; font-size:9px; font-weight:700; letter-spacing:0.14em; text-transform:uppercase; color:${dim}; background:${surface3}; border:1px solid ${border}; border-top:2px solid ${border};">${cat}</td>
+    </tr>`;
 
-    // Plan (locked)
-    const planStr = dtFmtPlan(r.id);
-    const planBg  = planStr === '—' ? rowBg : accentBgHex;
-    const planClr = planStr === '—' ? muted : accent;
-    bHtml += `<td style="padding:9px 12px; font-size:12px; font-weight:700; color:${planClr}; border:1px solid ${border}; background:${planBg}; text-align:right; white-space:nowrap;">${planStr}</td>`;
+    catRows.forEach(r => {
+      const isAuto = !!r.auto;
+      const rowBg  = globalRowIdx % 2 === 0 ? rowEven : rowOdd;
+      globalRowIdx++;
 
-    // Hour columns
-    DT_HKEYS.forEach(hk => {
-      const rawVal    = isAuto ? null : (dtData[r.id]?.[hk] || '');
-      const displayVal = dtGetDisplayVal(r.id, hk);
-      const pct       = r.hasPct ? dtCalcPct(r.id, hk) : null;
-      const pBg       = r.hasPct && pct !== null
-        ? (pct >= 100 ? (isDark ? 'rgba(46,194,122,0.20)' : 'rgba(46,194,122,0.15)')
-                      : pct >= 80 ? (isDark ? 'rgba(232,184,48,0.20)' : 'rgba(232,184,48,0.15)')
-                      : rowBg)
-        : (r.hasPct ? rowBg : rowBg);
-      const pClr = pct !== null
-        ? (pct >= 100 ? (isDark ? '#2ec27a' : '#1fa860')
-                      : pct >= 80 ? (isDark ? '#e8b830' : '#c49600')
-                      : muted)
-        : muted;
+      bHtml += `<tr>`;
 
-      // Value cell
-      if (isAuto) {
-        const autoVal = displayVal || '';
-        bHtml += `<td style="padding:9px 12px; font-size:12px; font-weight:600; color:${autoVal ? autoColor : muted}; border:1px solid ${border}; background:${autoVal ? autoBgHex : rowBg}; text-align:right; white-space:nowrap;">${autoVal || '—'}</td>`;
-      } else {
-        const shownVal = displayVal || '';
-        bHtml += `<td style="padding:0; border:1px solid ${border}; background:${accentBgHex}; text-align:right; min-width:90px;">
-          <input type="text" value="${shownVal}"
-            onfocus="this.value=dtData['${r.id}']['${hk}']||''; this.select();"
-            onblur="if(this.value.trim()!==''){dtData['${r.id}']['${hk}']=this.value.trim();}else{dtData['${r.id}']['${hk}']='';} dtRender();"
-            onkeydown="if(event.key==='Enter'||event.key==='Tab'){event.preventDefault();this.blur();}"
-            style="${inputSt}" placeholder="">
-        </td>`;
-      }
+      // Label
+      bHtml += `<td style="padding:9px 14px; font-size:12px; font-weight:600; color:${text}; border:1px solid ${border}; background:${rowBg}; white-space:nowrap; text-align:left;">${r.label}</td>`;
 
-      // Pct cell
-      if (r.hasPct) {
-        const pStr = dtPctDisplay(r.id, hk);
-        bHtml += `<td style="padding:9px 10px; font-size:12px; font-weight:600; border:1px solid ${border}; text-align:right; white-space:nowrap; background:${pBg}; color:${pStr ? pClr : muted};">${pStr}</td>`;
-      } else {
-        bHtml += `<td style="padding:9px 10px; font-size:12px; color:${muted}; border:1px solid ${border}; background:${rowBg}; text-align:center;">—</td>`;
-      }
+      // Plan (locked)
+      const planStr = dtFmtPlan(r.id);
+      // For noValueBg rows: plan cell has same bg as row (not accent)
+      const planBg  = r.noValueBg ? rowBg : (planStr === '—' ? rowBg : accentBgHex);
+      const planClr = r.noValueBg ? autoColor : (planStr === '—' ? muted : accent);
+      bHtml += `<td style="padding:9px 12px; font-size:12px; font-weight:700; color:${planClr}; border:1px solid ${border}; background:${planBg}; text-align:right; white-space:nowrap;">${planStr}</td>`;
+
+      // Hour columns
+      DT_HKEYS.forEach(hk => {
+        const rawVal    = isAuto ? null : (dtData[r.id]?.[hk] || '');
+        const displayVal = dtGetDisplayVal(r.id, hk);
+        const pct       = r.hasPct ? dtCalcPct(r.id, hk) : null;
+
+        // For invertPct rows (MED, HD): green = low (<= 100%), yellow = slightly over, red = way over
+        // For noValueBg rows: value cell keeps rowBg, only pct cell is colored
+        let pBg, pClr;
+        if (r.hasPct && pct !== null) {
+          if (r.invertPct) {
+            // ≤ 100% = green, 100-120% = yellow, > 120% = bad (no highlight = muted)
+            if (pct <= 100) {
+              pBg  = isDark ? 'rgba(46,194,122,0.20)' : 'rgba(46,194,122,0.15)';
+              pClr = isDark ? '#2ec27a' : '#1fa860';
+            } else if (pct <= 120) {
+              pBg  = isDark ? 'rgba(232,184,48,0.20)' : 'rgba(232,184,48,0.15)';
+              pClr = isDark ? '#e8b830' : '#c49600';
+            } else {
+              pBg  = rowBg;
+              pClr = muted;
+            }
+          } else {
+            if (pct >= 100) {
+              pBg  = isDark ? 'rgba(46,194,122,0.20)' : 'rgba(46,194,122,0.15)';
+              pClr = isDark ? '#2ec27a' : '#1fa860';
+            } else if (pct >= 80) {
+              pBg  = isDark ? 'rgba(232,184,48,0.20)' : 'rgba(232,184,48,0.15)';
+              pClr = isDark ? '#e8b830' : '#c49600';
+            } else {
+              pBg  = rowBg;
+              pClr = muted;
+            }
+          }
+        } else {
+          pBg  = rowBg;
+          pClr = muted;
+        }
+
+        // Value cell background:
+        // noValueBg rows → same as rowBg (auto color styling), others → accentBgHex for editable
+        let valueCellBg;
+        if (isAuto) {
+          valueCellBg = r.noValueBg ? rowBg : (displayVal ? autoBgHex : rowBg);
+        } else {
+          valueCellBg = accentBgHex;
+        }
+
+        // Value cell
+        if (isAuto) {
+          const autoVal = displayVal || '';
+          const autoTextColor = r.noValueBg ? (autoVal ? autoColor : muted) : (autoVal ? autoColor : muted);
+          bHtml += `<td style="padding:9px 12px; font-size:12px; font-weight:600; color:${autoTextColor}; border:1px solid ${border}; background:${valueCellBg}; text-align:right; white-space:nowrap;">${autoVal || '—'}</td>`;
+        } else {
+          const shownVal = displayVal || '';
+          bHtml += `<td style="padding:0; border:1px solid ${border}; background:${accentBgHex}; text-align:right; min-width:90px;">
+            <input type="text" value="${shownVal}"
+              onfocus="this.value=dtData['${r.id}']['${hk}']||''; this.select();"
+              onblur="if(this.value.trim()!==''){dtData['${r.id}']['${hk}']=this.value.trim();}else{dtData['${r.id}']['${hk}']='';} dtRender(); dtScheduleSave();"
+              onkeydown="if(event.key==='Enter'||event.key==='Tab'){event.preventDefault();this.blur();}"
+              style="${inputSt}" placeholder="">
+          </td>`;
+        }
+
+        // Pct cell
+        if (r.hasPct) {
+          const pStr = dtPctDisplay(r.id, hk);
+          bHtml += `<td style="padding:9px 10px; font-size:12px; font-weight:600; border:1px solid ${border}; text-align:right; white-space:nowrap; background:${pBg}; color:${pStr ? pClr : muted};">${pStr}</td>`;
+        } else {
+          bHtml += `<td style="padding:9px 10px; font-size:12px; color:${muted}; border:1px solid ${border}; background:${rowBg}; text-align:center;">—</td>`;
+        }
+      });
+
+      bHtml += `</tr>`;
     });
-
-    bHtml += `</tr>`;
   });
+
   tbody.innerHTML = bHtml;
 }
 
@@ -4944,8 +5059,10 @@ async function dtCopyPNG() {
 
   const innerW  = labelW + planW + exportIdxs.length * (valW + pctW);
   const totalW  = innerW + pad * 2;
-  const totalH  = hdrH + DT_ROWS.length * rowH + pad * 2 + 14;
-  const tableH  = hdrH + DT_ROWS.length * rowH;
+  const catHeaderH = 22; // height of each category separator row
+  const numCategories = 3;
+  const totalH  = hdrH + DT_ROWS.length * rowH + numCategories * catHeaderH + pad * 2 + 14;
+  const tableH  = hdrH + DT_ROWS.length * rowH + numCategories * catHeaderH;
   const colLabel = pad;
   const colPlan  = pad + labelW;
   const valX     = exportIdxs.map((_, ei) => pad + labelW + planW + ei * (valW + pctW));
@@ -4990,54 +5107,88 @@ async function dtCopyPNG() {
     drawText('plnění %',   pctX[ei], hMid, pctW, 'right', C.muted, hFont);
   });
 
-  DT_ROWS.forEach((r, ri) => {
-    const ry    = OY + hdrH + ri * rowH;
-    const rMid  = ry + rowH / 2;
-    const rowBg = ri % 2 === 0 ? C.rowEven : C.rowOdd;
-    const isAuto = !!r.auto;
+  const categories2 = ['Číselné', 'Výdej', 'Ostatní'];
+  let curY = OY + hdrH;
+  let globalPngRow = 0;
 
-    fillCell(colLabel, ry, labelW, rowH, rowBg);
-    drawText(r.label, colLabel, rMid, labelW, 'left', C.text, fNorm);
+  categories2.forEach(cat => {
+    const catRows2 = DT_ROWS.filter(r => r.category === cat);
+    if (!catRows2.length) return;
 
-    const planStr = dtFmtPlan(r.id);
-    fillCell(colPlan, ry, planW, rowH, planStr === '—' ? rowBg : C.accentBg);
-    drawText(planStr, colPlan, rMid, planW, 'right', planStr === '—' ? C.muted : C.accent, fBold);
+    // Category header
+    fillCell(colLabel, curY, innerW, catHeaderH, C.surf3);
+    ctx.save();
+    ctx.font = '700 8px Helvetica,Arial,sans-serif';
+    ctx.fillStyle = C.muted;
+    ctx.textBaseline = 'middle';
+    ctx.textAlign = 'left';
+    ctx.fillText(cat.toUpperCase(), colLabel + 8, curY + catHeaderH / 2);
+    ctx.restore();
+    curY += catHeaderH;
 
-    exportIdxs.forEach((hi, ei) => {
-      const hk      = DT_HKEYS[hi];
-      const vx      = valX[ei];
-      const px      = pctX[ei];
-      const dispVal = dtGetDisplayVal(r.id, hk);
-      const pct     = r.hasPct ? dtCalcPct(r.id, hk) : null;
+    catRows2.forEach(r => {
+      const ry    = curY;
+      const rMid  = ry + rowH / 2;
+      const rowBg = globalPngRow % 2 === 0 ? C.rowEven : C.rowOdd;
+      const isAuto = !!r.auto;
+      globalPngRow++;
 
-      const valBg  = dispVal ? (isAuto ? C.autoBg : C.accentBg) : rowBg;
-      const valClr = dispVal ? (isAuto ? C.auto   : C.accent)   : C.muted;
-      fillCell(vx, ry, valW, rowH, valBg);
-      drawText(dispVal || '', vx, rMid, valW, 'right', valClr, isAuto ? fNorm : fBold);
+      fillCell(colLabel, ry, labelW, rowH, rowBg);
+      drawText(r.label, colLabel, rMid, labelW, 'left', C.text, fNorm);
 
-      if (r.hasPct) {
-        const pBg  = pct !== null ? (pct >= 100 ? 'rgba(46,194,122,0.20)' : pct >= 80 ? 'rgba(232,184,48,0.20)' : rowBg) : rowBg;
-        const pFg  = pct !== null ? (pct >= 100 ? C.green : pct >= 80 ? C.yellow : C.muted) : C.muted;
-        const pStr = pct !== null ? pct.toLocaleString('cs-CZ', {minimumFractionDigits:2, maximumFractionDigits:2}) + '%' : '';
-        fillCell(px, ry, pctW, rowH, pBg);
-        drawText(pStr, px, rMid, pctW, 'right', pStr ? pFg : C.muted, fNorm);
-      } else {
-        fillCell(px, ry, pctW, rowH, rowBg);
-        drawText('—', px, rMid, pctW, 'center', C.muted, fNorm);
-      }
+      const planStr = dtFmtPlan(r.id);
+      const planBgPng  = r.noValueBg ? rowBg : (planStr === '—' ? rowBg : C.accentBg);
+      const planClrPng = r.noValueBg ? C.auto : (planStr === '—' ? C.muted : C.accent);
+      fillCell(colPlan, ry, planW, rowH, planBgPng);
+      drawText(planStr, colPlan, rMid, planW, 'right', planClrPng, fBold);
+
+      exportIdxs.forEach((hi, ei) => {
+        const hk      = DT_HKEYS[hi];
+        const vx      = valX[ei];
+        const px      = pctX[ei];
+        const dispVal = dtGetDisplayVal(r.id, hk);
+        const pct     = r.hasPct ? dtCalcPct(r.id, hk) : null;
+
+        // Value cell bg: noValueBg → rowBg, auto → autoBg, editable → accentBg
+        const valBg  = r.noValueBg ? rowBg : (dispVal ? (isAuto ? C.autoBg : C.accentBg) : rowBg);
+        const valClr = dispVal ? (isAuto ? C.auto : C.accent) : C.muted;
+        fillCell(vx, ry, valW, rowH, valBg);
+        drawText(dispVal || '', vx, rMid, valW, 'right', valClr, isAuto ? fNorm : fBold);
+
+        if (r.hasPct) {
+          let pBg, pFg;
+          if (pct !== null) {
+            if (r.invertPct) {
+              pBg = pct <= 100 ? 'rgba(46,194,122,0.20)' : pct <= 120 ? 'rgba(232,184,48,0.20)' : rowBg;
+              pFg = pct <= 100 ? C.green : pct <= 120 ? C.yellow : C.muted;
+            } else {
+              pBg = pct >= 100 ? 'rgba(46,194,122,0.20)' : pct >= 80 ? 'rgba(232,184,48,0.20)' : rowBg;
+              pFg = pct >= 100 ? C.green : pct >= 80 ? C.yellow : C.muted;
+            }
+          } else { pBg = rowBg; pFg = C.muted; }
+          const pStr = pct !== null ? pct.toLocaleString('cs-CZ', {minimumFractionDigits:2, maximumFractionDigits:2}) + '%' : '';
+          fillCell(px, ry, pctW, rowH, pBg);
+          drawText(pStr, px, rMid, pctW, 'right', pStr ? pFg : C.muted, fNorm);
+        } else {
+          fillCell(px, ry, pctW, rowH, rowBg);
+          drawText('—', px, rMid, pctW, 'center', C.muted, fNorm);
+        }
+      });
+
+      curY += rowH;
     });
   });
 
   ctx.strokeStyle = C.border; ctx.lineWidth = 0.5;
-  for (let ri = 0; ri <= DT_ROWS.length; ri++) hline(colLabel, tableRight, OY + hdrH + ri * rowH);
   hline(colLabel, tableRight, OY);
-  vline(colLabel,   OY, OY + tableH);
-  vline(colPlan,    OY, OY + tableH);
-  exportIdxs.forEach((_, ei) => { vline(valX[ei], OY, OY + tableH); vline(pctX[ei], OY, OY + tableH); });
-  vline(tableRight, OY, OY + tableH);
+  hline(colLabel, tableRight, curY);
+  vline(colLabel,   OY, curY);
+  vline(colPlan,    OY, curY);
+  exportIdxs.forEach((_, ei) => { vline(valX[ei], OY, curY); vline(pctX[ei], OY, curY); });
+  vline(tableRight, OY, curY);
   ctx.strokeStyle = C.border; ctx.lineWidth = 1;
   hline(colLabel, tableRight, OY + hdrH);
-  ctx.strokeRect(colLabel, OY, innerW, tableH);
+  ctx.strokeRect(colLabel, OY, innerW, curY - OY);
 
   ctx.fillStyle = C.wmark; ctx.font = '9px Helvetica,Arial,sans-serif';
   ctx.textAlign = 'right'; ctx.textBaseline = 'alphabetic';
