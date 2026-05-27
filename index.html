@@ -4727,7 +4727,10 @@ async function dtLoadFromGH() {
     if (!res.ok) { dtInitEmpty(); return; }
     const meta = await res.json();
     dtFileSha = meta.sha;
-    const decoded = JSON.parse(atob(meta.content.replace(/\n/g, '')));
+    //const decoded = JSON.parse(atob(meta.content.replace(/\n/g, '')));
+    const rawContent = atob(meta.content.replace(/\n/g, ''));
+    const decoded = rawContent.trim() ? JSON.parse(rawContent) : {};
+    
     if (decoded && typeof decoded === 'object') {
       DT_ROWS.forEach(r => { if (decoded[r.id]) dtData[r.id] = decoded[r.id]; });
     }
@@ -4773,7 +4776,7 @@ async function dtSaveToGH() {
         `https://api.github.com/repos/${DT_GH_REPO}/contents/${DT_GH_FILE}?ref=${DT_GH_BRANCH}`,
         { headers: { Authorization: `token ${DT_GH_TOKEN}` } }
       ).then(r => r.json()).catch(() => null);
-      if (meta?.sha) { dtFileSha = meta.sha; dtSaveToBin(); }
+      if (meta?.sha) { dtFileSha = meta.sha; dtSaveToGH(); }
     }
   } catch(e) { /* silently fail */ }
 }
