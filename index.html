@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="cs">
 <head>
@@ -1755,6 +1756,10 @@
         <span class="sidebar-icon">⏱</span>
         <span class="sidebar-label">Docházka</span>
       </div>
+      <div class="sidebar-item" id="sbi-brigo-dochazka" onclick="sidebarNav('brigo-dochazka')">
+        <span class="sidebar-icon">🧑‍💼</span>
+        <span class="sidebar-label">Brigo Docházka</span>
+      </div>
       <div class="sidebar-item" id="sbi-lunch" onclick="sidebarNav('lunch')">
         <span class="sidebar-icon">🍽</span>
         <span class="sidebar-label">Plánovač obědů</span>
@@ -2419,6 +2424,10 @@
         <div style="font-size:10px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--dim);margin-bottom:10px;">Plán obědů</div>
         <div id="lunch-schedule"></div>
 
+        <div id="lunch-brigo-section" style="margin-top:24px;display:none;">
+          <div style="font-size:10px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--dim);margin-bottom:10px;">🧑‍💼 Brigošové dnes</div>
+          <div id="lunch-brigo-list" style="display:flex;flex-wrap:wrap;gap:7px;margin-bottom:6px;"></div>
+        </div>
         <div style="margin-top:24px;">
           <div style="font-size:10px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--dim);margin-bottom:10px;">Pozice</div>
           <div style="border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;">
@@ -2437,6 +2446,33 @@
       </div>
     </div>
   </div>
+
+
+<!-- BRIGO DOCHÁZKA VIEW -->
+<div id="view-brigo-dochazka" style="display:none; flex-direction:column; height:100%; overflow:hidden; width:100%;">
+  <div class="doch-header">
+    <div class="view-header" style="margin-bottom:0; padding:16px 28px; border-bottom:1px solid var(--border); flex-shrink:0;">
+      <div style="display:flex;align-items:center;gap:12px;">
+        <div class="view-title">Brigo Docházka</div>
+        <div id="brigo-load-status" style="font-size:11px;color:var(--muted);margin-left:8px;"></div>
+        <button onclick="brigoLoadData()" style="display:flex;align-items:center;gap:6px;background:var(--surface2);border:1px solid var(--border);color:var(--muted);font-family:Helvetica,Arial,sans-serif;font-size:12px;font-weight:600;padding:5px 12px;border-radius:6px;cursor:pointer;transition:all 0.15s;" onmouseover="this.style.borderColor='var(--accent)';this.style.color='var(--accent)'" onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--muted)'">↻ Obnovit</button>
+        <a href="https://docs.google.com/spreadsheets/d/1mEke18XDi76U_92N_HifkWSFlrsrTWs962_yPWjuYDA/edit?usp=sharing" target="_blank" style="display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:600;color:var(--muted);text-decoration:none;border:1px solid var(--border);border-radius:5px;padding:3px 10px;transition:all 0.15s;" onmouseover="this.style.borderColor='var(--muted)';this.style.color='var(--text)'" onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--muted)'">↗ Otevřít v Google Sheets</a>
+      </div>
+      <div class="filter-group" style="flex-wrap:wrap;gap:6px;">
+        <button class="toggle-btn" id="btn-brigo-today" onclick="setBrigoFilter('today')">Dnes</button>
+        <button class="toggle-btn" id="btn-brigo-tomorrow" onclick="setBrigoFilter('tomorrow')">Zítra</button>
+        <input type="date" id="brigo-date-pick" style="font-family:Helvetica,Arial,sans-serif;font-size:12px;padding:5px 10px;border-radius:5px;border:1px solid var(--border);background:var(--surface2);color:var(--text);cursor:pointer;outline:none;" onchange="setBrigoFilter('pick')">
+        <div style="width:1px;height:20px;background:var(--border);margin:0 4px;"></div>
+        <button class="toggle-btn" id="btn-brigo-month" onclick="setBrigoFilter('month')">📅 Měsíc</button>
+        <select id="brigo-month-select" onchange="brigoOnMonthChange()" style="font-family:Helvetica,Arial,sans-serif;font-size:12px;padding:5px 10px;border-radius:5px;border:1px solid var(--border);background:var(--surface2);color:var(--text);cursor:pointer;outline:none;display:none;">
+        </select>
+      </div>
+    </div>
+  </div>
+  <div id="brigo-content" style="flex:1; overflow-y:auto; overflow-x:auto; padding:24px 28px; width:100%;">
+    <div style="padding:60px;text-align:center;color:var(--muted);font-size:13px;">⏳ Načítání dat z Google Sheets…</div>
+  </div>
+</div>
 
 <!-- LOW PERFORMANCE VIEW -->
 <div id="view-low-performance" style="display:none; padding:28px 28px 40px; width:100%; box-sizing:border-box; overflow-y:auto; height:100%;">
@@ -3719,6 +3755,32 @@ function renderDochazka() {
   }
 
   html += `</tbody></table></div>`;
+
+  // Add brigošové section for day views
+  if (isDayView && Object.keys(brigoCache).length > 0) {
+    const brigoDate = (() => {
+      if (dochFilter === 'today') return new Date();
+      if (dochFilter === 'tomorrow') { const t = new Date(); t.setDate(t.getDate()+1); return t; }
+      const picker = document.getElementById('doch-date-pick');
+      return picker && picker.value ? new Date(picker.value + 'T00:00:00') : new Date();
+    })();
+    const brigoEmps = brigoGetEmployeesForDate(brigoDate);
+    if (brigoEmps.length > 0) {
+      html += `<div style="margin-top:28px;">
+        <div style="font-size:10px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--dim);margin-bottom:12px;">🧑‍💼 Brigošové (${brigoEmps.length})</div>
+        <div style="display:flex;flex-wrap:wrap;gap:8px;">
+          ${brigoEmps.map(e => `<div style="background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:8px 12px;min-width:160px;">
+            <div style="font-size:12px;font-weight:700;color:var(--text);">${e.name}</div>
+            <div style="font-size:11px;color:var(--muted);margin-top:2px;">${e.position || 'Výdej'}</div>
+            <div style="font-size:11px;color:var(--accent);font-family:var(--mono);margin-top:3px;font-weight:700;">${e.timeLabel}</div>
+          </div>`).join('')}
+        </div>
+      </div>`;
+    }
+  } else if (isDayView && Object.keys(brigoCache).length === 0) {
+    html += `<div style="margin-top:20px;font-size:11px;color:var(--dim);font-style:italic;">💡 Otevři sekci <strong>Brigo Docházka</strong> pro načtení brigošů.</div>`;
+  }
+
   container.innerHTML = html;
   document.getElementById('btn-doch-all') && document.getElementById('btn-doch-all').classList.toggle('active', dochFilter === 'all');
   document.getElementById('btn-doch-today') && document.getElementById('btn-doch-today').classList.toggle('active', dochFilter === 'today');
@@ -4139,7 +4201,7 @@ function asrtgtExport() {
 
 // ===== DOCUMENTATION =====
 function openDoc() {
-  ['view-home','view-branch','view-users','view-dochazka','view-links','view-kalkulacka','view-asrtgt','view-lunch','view-low-performance','view-mujvykon'].forEach(id => { const el = document.getElementById(id); if (el) el.style.display = 'none'; });
+  ['view-home','view-branch','view-users','view-dochazka','view-brigo-dochazka','view-links','view-kalkulacka','view-asrtgt','view-lunch','view-low-performance','view-mujvykon'].forEach(id => { const el = document.getElementById(id); if (el) el.style.display = 'none'; });
   document.getElementById('doc-view').style.display = 'flex';
   if (window._docObserverInit) window._docObserverInit();
   document.body.style.overflow = 'hidden';
@@ -4211,7 +4273,7 @@ function sidebarNav(section) {
   });
 
   // Hide all views
-  ['view-home','view-branch','view-users','view-dochazka','view-links','view-kalkulacka','view-asrtgt','view-lunch','view-low-performance','view-mujvykon']
+  ['view-home','view-branch','view-users','view-dochazka','view-brigo-dochazka','view-links','view-kalkulacka','view-asrtgt','view-lunch','view-low-performance','view-mujvykon']
     .forEach(id => { const el = document.getElementById(id); if (el) el.style.display = 'none'; });
 
   // Nav tabs hidden (no longer in nav bar)
@@ -4229,6 +4291,9 @@ function sidebarNav(section) {
   } else if (section === 'dochazka') {
     document.getElementById('view-dochazka').style.display = 'flex';
     renderDochazka();
+  } else if (section === 'brigo-dochazka') {
+    document.getElementById('view-brigo-dochazka').style.display = 'flex';
+    brigoInit();
   } else if (section === 'links') {
     document.getElementById('view-links').style.display = 'block';
   } else if (section === 'kalkulacka') {
@@ -4341,6 +4406,37 @@ function lunchGetShiftEmployees(dateStr) {
 function lunchRender() {
   lunchRenderPool();
   lunchRenderSchedule();
+  // brigoRenderBrigo is called separately after brigo data loads
+  if (typeof lunchRenderBrigo === 'function') lunchRenderBrigo();
+}
+
+function lunchRenderBrigo() {
+  const section = document.getElementById('lunch-brigo-section');
+  const listEl  = document.getElementById('lunch-brigo-list');
+  if (!section || !listEl) return;
+
+  // brigoCache may not exist yet if brigo section was never opened
+  if (typeof brigoCache === 'undefined' || Object.keys(brigoCache).length === 0) {
+    section.style.display = 'none';
+    return;
+  }
+
+  const di = document.getElementById('lunch-date');
+  const dateStr = (di && di.value) ? di.value : new Date().toISOString().slice(0, 10);
+  const date = new Date(dateStr + 'T00:00:00');
+
+  const emps = brigoGetEmployeesForDate(date);
+  if (emps.length === 0) { section.style.display = 'none'; return; }
+
+  section.style.display = 'block';
+  const hdr = section.querySelector('div:first-child');
+  if (hdr) hdr.textContent = `🧑‍💼 Brigošové (${emps.length})`;
+  listEl.innerHTML = emps.map(e => `
+    <div style="background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:7px 11px;">
+      <div style="font-size:12px;font-weight:700;color:var(--text);">${e.name}</div>
+      <div style="font-size:10px;color:var(--muted);">${e.position || 'Výdej'}</div>
+      <div style="font-size:10px;color:var(--accent);font-family:var(--mono);font-weight:700;">${e.timeLabel}</div>
+    </div>`).join('');
 }
 
 function lunchRenderPool() {
@@ -4798,6 +4894,450 @@ async function lunchExport() {
   }
 }
 
+
+// ===== BRIGO DOCHÁZKA =====
+const BRIGO_APPS_URL = 'https://script.google.com/macros/s/AKfycbxxecI2nGiWsrjZL-PY3emdTsHDubHZHOBcVTAaAh4BMJT06O9SS5JurYnYobKPdJyVKg/exec';
+const BRIGO_MONTHS_CZ = ['Leden','Únor','Březen','Duben','Květen','Červen','Červenec','Srpen','Září','Říjen','Listopad','Prosinec'];
+
+let brigoCache   = {};   // { 'Květen26': [[row],...] }
+let brigoSheets  = [];   // all sheet names
+let brigoFilter  = 'today';   // 'today' | 'tomorrow' | 'pick' | 'month'
+let brigoLoading = false;
+
+// ── helpers ────────────────────────────────────────────────────────
+
+function brigoSheetForDate(date) {
+  return BRIGO_MONTHS_CZ[date.getMonth()] + String(date.getFullYear()).slice(-2);
+}
+
+function brigoFindSheet(name) {
+  if (brigoSheets.includes(name)) return name;
+  const norm = s => s.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().trim();
+  return brigoSheets.find(s => norm(s) === norm(name)) || null;
+}
+
+async function brigoFetch(sheetName) {
+  const url = sheetName
+    ? `${BRIGO_APPS_URL}?sheet=${encodeURIComponent(sheetName)}`
+    : BRIGO_APPS_URL;
+  const r = await fetch(url);
+  if (!r.ok) throw new Error('HTTP ' + r.status);
+  const j = await r.json();
+  if (j.error) throw new Error(j.error);
+  return j;
+}
+
+// ── parser ─────────────────────────────────────────────────────────
+// Data layout (confirmed from debug):
+//   Row N  : [ '', '2026-05-28T07:00:00.000Z', '', ... ]  ← day header: date ISO in COL1
+//   Row N+1: [ 'Určení:', '↓ Výdej ↓', '↓ Prodej ↓', '↓ Výdej ↓', '↓ Výdej ↓', '↓ Výdej ↓', '↓ LEGO / Retail ↓', '', ... ]
+//   Row N+2: [ '8-9 h', 'Frey Jakub', '', '', '', '', '', '', '8-9 h', '#1' ]
+//   Row N+3: [ '10-11 h', 'Pěč Adam', 'Frey Jakub', '', '', '', '', '', '10-11 h', '#2' ]
+//   ...
+//   Row M  : [ '', '', '', '', '', '', '', '', 'Celkem hod.:', '#22' ]
+
+function brigoParseISODate(v) {
+  // Accepts: Date object, ISO string "2026-05-28T07:00:00.000Z", or serial number
+  if (!v && v !== 0) return null;
+  let d;
+  if (v instanceof Date) { d = v; }
+  else if (typeof v === 'string' && v.includes('T')) { d = new Date(v); }
+  else if (typeof v === 'number') {
+    // Google Sheets serial: days since 1899-12-30
+    d = new Date((v - 25569) * 86400 * 1000);
+  } else { return null; }
+  if (isNaN(d.getTime())) return null;
+  return { day: d.getUTCDate(), month: d.getUTCMonth() + 1, year: d.getUTCFullYear() };
+}
+
+function isTimeSlot(v) {
+  return /^\d{1,2}[-–]\d{1,2}\s*h?$/i.test(String(v ?? '').trim());
+}
+function parseHourFrom(v) {
+  return parseInt(String(v).match(/(\d{1,2})[-–]/)?.[1] ?? '0');
+}
+
+// Returns array of { date:{day,month,year}, name, position, timeFrom, timeTo, timeLabel }
+function brigoParseFull(rows) {
+  const entries = [];
+  let currentDate = null;
+  let posHeaders  = {};  // colIdx → label
+
+  for (let r = 0; r < rows.length; r++) {
+    const row = rows[r];
+    const c0 = String(row[0] ?? '').trim();
+    const c1 = row[1];  // may be Date/ISO/number
+
+    // ── Day header: COL0 empty, COL1 is a date value ──
+    if (c0 === '' || c0 === null) {
+      const parsed = brigoParseISODate(c1);
+      if (parsed) {
+        currentDate = parsed;
+        posHeaders  = {};
+        continue;
+      }
+    }
+
+    // ── Position header row: COL0 = "Určení:" ──
+    if (c0 === 'Určení:') {
+      posHeaders = {};
+      for (let c = 1; c < row.length; c++) {
+        const h = String(row[c] ?? '').trim()
+          .replace(/^↓\s*/,'').replace(/\s*↓$/,'').trim();
+        if (h) posHeaders[c] = h;
+      }
+      continue;
+    }
+
+    if (!currentDate) continue;
+    if (!isTimeSlot(c0)) continue;  // skip non-time rows (Celkem etc.)
+
+    const hour = parseHourFrom(c0);
+
+    // COL1..COL6 may contain employee names
+    for (let c = 1; c <= 6; c++) {
+      const name = String(row[c] ?? '').trim();
+      if (!name || name === '0' || name.startsWith('VOLNÁ')) continue;
+      const position = posHeaders[c] || 'Výdej';
+      entries.push({ date: { ...currentDate }, name, position, hour });
+    }
+  }
+
+  // Aggregate: group by date+name → get min/max hour
+  const key = (d, n) => `${d.year}-${d.month}-${d.day}||${n}`;
+  const map = {};
+  for (const e of entries) {
+    const k = key(e.date, e.name);
+    if (!map[k]) map[k] = { date: e.date, name: e.name, position: e.position, hours: [] };
+    map[k].hours.push(e.hour);
+  }
+
+  return Object.values(map).map(e => {
+    const sorted = [...new Set(e.hours)].sort((a,b) => a-b);
+    const from = sorted[0], to = sorted[sorted.length-1] + 1;
+    return {
+      date: e.date,
+      name: e.name,
+      position: e.position,
+      timeFrom: from, timeTo: to,
+      timeLabel: `${from}:00\u2013${to}:00`
+    };
+  }).sort((a,b) =>
+    a.date.day - b.date.day || a.timeFrom - b.timeFrom || a.name.localeCompare(b.name,'cs')
+  );
+}
+
+// Filter parsed entries for a specific day
+function brigoForDay(allEntries, day, month) {
+  return allEntries.filter(e => e.date.day === day && e.date.month === month);
+}
+
+// Returns employees for a JS Date (uses cache)
+function brigoGetEmployeesForDate(date) {
+  const actual = brigoFindSheet(brigoSheetForDate(date));
+  if (!actual || !brigoCache[actual]) return [];
+  const all = brigoCache[actual]._parsed ||
+    (brigoCache[actual]._parsed = brigoParseFull(brigoCache[actual].raw));
+  return brigoForDay(all, date.getDate(), date.getMonth() + 1);
+}
+
+// ── debug ──────────────────────────────────────────────────────────
+function brigoDebug() {
+  const cont = document.getElementById('brigo-content');
+  if (!cont) return;
+  const actual = brigoFindSheet(brigoSheetForDate(new Date()));
+  if (!actual || !brigoCache[actual]) {
+    cont.innerHTML = '<div style="padding:20px;color:var(--red);">No cached data — click Obnovit first.</div>';
+    return;
+  }
+  const rows = brigoCache[actual].raw;
+  const show = rows.slice(Math.max(0,rows.length-85), rows.length);
+  const startR = Math.max(0, rows.length - 85);
+
+  let html = `<div style="padding:16px;font-family:var(--mono);font-size:10px;color:var(--text);overflow-x:auto;">`;
+  html += `<b>Total rows: ${rows.length}</b> — showing last 85<br><br>`;
+  html += `<table style="border-collapse:collapse;">`;
+  html += `<tr style="background:var(--surface2);">`+
+    `<th style="padding:2px 5px;border:1px solid var(--border);">#</th>`+
+    [0,1,2,3,4,5,6,7,8].map(i=>`<th style="padding:2px 5px;border:1px solid var(--border);">C${i}</th>`).join('')+
+    `</tr>`;
+  show.forEach((row,i) => {
+    const hasContent = row.some(v => v !== '' && v !== null && v !== undefined && v !== 0);
+    if (!hasContent) return;
+    html += `<tr>`;
+    html += `<td style="padding:1px 5px;border:1px solid var(--border);color:var(--dim);">${startR+i}</td>`;
+    for (let c = 0; c <= 8; c++) {
+      const v = row[c];
+      const d = v instanceof Date ? `📅${v.toLocaleDateString('cs-CZ')}` :
+                typeof v === 'number' ? `[${v}]` : String(v??'').slice(0,30);
+      const col = v instanceof Date ? 'var(--yellow)' :
+                  typeof v === 'number' ? 'var(--accent2)' :
+                  String(v||'').match(/\d{1,2}[-–]\d/) ? 'var(--accent)' : 'var(--text)';
+      html += `<td style="padding:1px 5px;border:1px solid var(--border);color:${col};white-space:nowrap;">${d}</td>`;
+    }
+    html += `</tr>`;
+  });
+  html += `</table></div>`;
+  cont.innerHTML = html;
+}
+
+// ── load / cache ───────────────────────────────────────────────────
+
+async function brigoLoadSheet(actualName) {
+  if (brigoCache[actualName] !== undefined) return; // already cached
+  try {
+    const json = await brigoFetch(actualName);
+    brigoCache[actualName] = { raw: json.data };
+    console.log('[Brigo] Loaded', actualName, '— rows:', json.data.length);
+  } catch(err) {
+    brigoCache[actualName] = null;
+    console.warn('[Brigo] Failed:', actualName, err.message);
+  }
+}
+
+async function brigoLoadData(silent = false) {
+  if (brigoLoading) return;
+  brigoLoading = true;
+  const statusEl = document.getElementById('brigo-load-status');
+  if (statusEl) statusEl.textContent = '⏳ Načítání…';
+
+  try {
+    // Fetch sheet list
+    if (brigoSheets.length === 0) {
+      const meta = await brigoFetch(null);
+      brigoSheets = meta.sheets || [];
+      console.log('[Brigo] Sheets:', brigoSheets);
+      brigoPopulateMonthSelect();
+    }
+
+    // Load today + tomorrow + active month select
+    const now = new Date();
+    const tmr = new Date(now); tmr.setDate(now.getDate()+1);
+    const datesNeeded = [now, tmr];
+    const picker = document.getElementById('brigo-date-pick');
+    if (picker?.value) datesNeeded.push(new Date(picker.value + 'T00:00:00'));
+
+    const sheetsNeeded = new Set(datesNeeded.map(d => brigoFindSheet(brigoSheetForDate(d))).filter(Boolean));
+
+    // Also load currently selected month if month view active
+    const mSel = document.getElementById('brigo-month-select');
+    if (mSel?.value) sheetsNeeded.add(mSel.value);
+
+    for (const s of sheetsNeeded) await brigoLoadSheet(s);
+
+    if (statusEl) statusEl.textContent = '✓ Aktuální';
+    brigoRender();
+    lunchRenderBrigo();
+  } catch(err) {
+    if (statusEl) statusEl.textContent = '⚠ Chyba';
+    if (!silent) console.warn('[Brigo]', err);
+    const cont = document.getElementById('brigo-content');
+    if (cont) cont.innerHTML = `<div style="padding:60px;text-align:center;color:var(--red);font-size:13px;">
+      ⚠ Nepodařilo se načíst data<br>
+      <small style="color:var(--muted);display:block;margin-top:8px;">${err.message}</small></div>`;
+  } finally {
+    brigoLoading = false;
+  }
+}
+
+// ── filter / render ────────────────────────────────────────────────
+
+function brigoOnMonthChange() {
+  const mSel = document.getElementById('brigo-month-select');
+  const sel = document.getElementById('brigo-month-select');
+  sel.style.display = 'inline-block';
+  setBrigoFilter('month');
+}
+
+function setBrigoFilter(f) {
+  brigoFilter = f;
+  document.getElementById('btn-brigo-today')?.classList.toggle('active', f === 'today');
+  document.getElementById('btn-brigo-tomorrow')?.classList.toggle('active', f === 'tomorrow');
+  document.getElementById('btn-brigo-month')?.classList.toggle('active', f === 'month');
+  const mSelEl = document.getElementById('brigo-month-select');
+  if (mSelEl) {
+    mSelEl.style.display = f === 'month' ? 'inline-block' : 'none';
+    if (f === 'month' && mSelEl.options.length === 0) brigoPopulateMonthSelect();
+  }
+
+  if (f === 'pick') {
+    const picker = document.getElementById('brigo-date-pick');
+    if (picker?.value) {
+      const d = new Date(picker.value + 'T00:00:00');
+      const actual = brigoFindSheet(brigoSheetForDate(d));
+      if (actual && brigoCache[actual] === undefined) {
+        brigoLoadSheet(actual).then(() => { brigoRender(); lunchRenderBrigo(); });
+        return;
+      }
+    }
+  }
+  if (f === 'month') {
+    const mSel = document.getElementById('brigo-month-select');
+    const actual = mSel?.value;
+    if (actual && brigoCache[actual] === undefined) {
+      brigoLoadSheet(actual).then(() => brigoRender());
+      return;
+    }
+  }
+  brigoRender();
+}
+
+function brigoTargetDate() {
+  if (brigoFilter === 'tomorrow') { const t = new Date(); t.setDate(t.getDate()+1); return t; }
+  if (brigoFilter === 'pick') {
+    const p = document.getElementById('brigo-date-pick');
+    if (p?.value) return new Date(p.value + 'T00:00:00');
+  }
+  return new Date();
+}
+
+function brigoPopulateMonthSelect() {
+  const sel = document.getElementById('brigo-month-select');
+  if (!sel) return;
+  sel.innerHTML = brigoSheets.map(s => `<option value="${s}">${s}</option>`).join('');
+  // Default: current month
+  const cur = brigoFindSheet(brigoSheetForDate(new Date()));
+  if (cur) sel.value = cur;
+}
+
+function brigoRender() {
+  const cont = document.getElementById('brigo-content');
+  if (!cont) return;
+
+  document.getElementById('btn-brigo-today')?.classList.toggle('active', brigoFilter === 'today');
+  document.getElementById('btn-brigo-tomorrow')?.classList.toggle('active', brigoFilter === 'tomorrow');
+  document.getElementById('btn-brigo-month')?.classList.toggle('active', brigoFilter === 'month');
+
+  // ── Month view ─────────────────────────────────────────────────
+  if (brigoFilter === 'month') {
+    const mSel = document.getElementById('brigo-month-select');
+    const actual = mSel?.value;
+    if (!actual) { cont.innerHTML = `<div style="padding:40px;text-align:center;color:var(--muted);">Vyber měsíc.</div>`; return; }
+    if (!brigoCache[actual]) { cont.innerHTML = `<div style="padding:40px;text-align:center;color:var(--muted);">⏳ Načítání ${actual}…</div>`; return; }
+
+    const all = brigoCache[actual]._parsed ||
+      (brigoCache[actual]._parsed = brigoParseFull(brigoCache[actual].raw));
+
+    if (all.length === 0) {
+      cont.innerHTML = `<div style="padding:40px;text-align:center;color:var(--muted);">Pro ${actual} nejsou žádná data.</div>`;
+      return;
+    }
+
+    // Group by day
+    const byDay = {};
+    for (const e of all) {
+      const k = `${e.date.year}-${String(e.date.month).padStart(2,'0')}-${String(e.date.day).padStart(2,'0')}`;
+      if (!byDay[k]) byDay[k] = { date: e.date, emps: [] };
+      byDay[k].emps.push(e);
+    }
+    const days = Object.keys(byDay).sort();
+    const totalUnique = new Set(all.map(e=>e.name)).size;
+
+    let html = `<div class="doch-stats">
+      <div class="doch-stat"><div class="doch-stat-label">Měsíc</div><div class="doch-stat-value">${actual}</div></div>
+      <div class="doch-stat"><div class="doch-stat-label">Dnů s brigošem</div><div class="doch-stat-value" style="color:var(--accent)">${days.length}</div></div>
+      <div class="doch-stat"><div class="doch-stat-label">Unikátních brigošů</div><div class="doch-stat-value" style="color:var(--accent2)">${totalUnique}</div></div>
+    </div>`;
+
+    for (const dk of days) {
+      const { date, emps } = byDay[dk];
+      const dayLabel = new Date(date.year, date.month-1, date.day)
+        .toLocaleDateString('cs-CZ', { weekday:'long', day:'numeric', month:'long' });
+      html += `<div style="margin-bottom:20px;">
+        <div style="font-size:11px;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;
+                    color:var(--accent);border-bottom:1px solid var(--border);padding-bottom:6px;margin-bottom:10px;">
+          ${dayLabel} <span style="color:var(--dim);font-weight:400;">(${emps.length} ${emps.length===1?'brigošo':'brigošů'})</span>
+        </div>
+        <div class="doch-wrap"><table class="doch-table" style="width:auto;min-width:480px;">
+          <thead><tr>
+            <th class="doch-col-name doch-hdr-month" style="min-width:180px;">Jméno</th>
+            <th class="doch-hdr-month" style="min-width:140px;">Pozice</th>
+            <th class="doch-hdr-month" style="min-width:140px;">Čas směny</th>
+          </tr></thead>
+          <tbody>
+            ${emps.map(e=>`<tr style="border-bottom:1px solid var(--border);">
+              <td style="padding:8px 14px;font-size:13px;font-weight:600;color:var(--text);">${e.name}</td>
+              <td style="padding:8px 14px;font-size:12px;color:var(--muted);">${e.position}</td>
+              <td style="padding:8px 14px;font-size:12px;font-weight:700;color:var(--accent);font-family:var(--mono);">${e.timeLabel}</td>
+            </tr>`).join('')}
+          </tbody>
+        </table></div>
+      </div>`;
+    }
+    cont.innerHTML = html;
+    return;
+  }
+
+  // ── Day view (today / tomorrow / pick) ─────────────────────────
+  const date   = brigoTargetDate();
+  const wanted = brigoSheetForDate(date);
+  const actual = brigoFindSheet(wanted);
+  const dayLbl = date.toLocaleDateString('cs-CZ',
+    { weekday:'long', day:'numeric', month:'long', year:'numeric' });
+
+  if (brigoSheets.length === 0) {
+    cont.innerHTML = `<div style="padding:60px;text-align:center;color:var(--muted);font-size:13px;">⏳ Načítání…</div>`;
+    return;
+  }
+  if (!actual) {
+    cont.innerHTML = `<div style="padding:60px;text-align:center;color:var(--muted);font-size:13px;">
+      📅 List <em>${wanted}</em> neexistuje.<br>
+      <small style="color:var(--dim);margin-top:6px;display:block;">Dostupné: ${brigoSheets.join(', ')}</small></div>`;
+    return;
+  }
+  if (!brigoCache[actual]) {
+    cont.innerHTML = `<div style="padding:60px;text-align:center;color:var(--muted);">⏳ Načítání ${actual}…</div>`;
+    return;
+  }
+
+  const all  = brigoCache[actual]._parsed ||
+    (brigoCache[actual]._parsed = brigoParseFull(brigoCache[actual].raw));
+  const emps = brigoForDay(all, date.getDate(), date.getMonth()+1);
+
+  const stats = `<div class="doch-stats">
+    <div class="doch-stat"><div class="doch-stat-label">Datum</div>
+      <div class="doch-stat-value" style="font-size:12px;">${dayLbl}</div></div>
+    <div class="doch-stat"><div class="doch-stat-label">Brigošů celkem</div>
+      <div class="doch-stat-value" style="color:var(--accent)">${emps.length}</div></div>
+  </div>`;
+
+  if (emps.length === 0) {
+    cont.innerHTML = stats + `<div style="padding:32px;text-align:center;color:var(--muted);font-size:13px;">
+      Pro tento den nejsou žádní brigošové naplánováni.</div>`;
+    return;
+  }
+
+  const tbody = emps.map(e=>`<tr style="border-bottom:1px solid var(--border);">
+    <td style="padding:10px 14px;font-size:13px;font-weight:600;color:var(--text);">${e.name}</td>
+    <td style="padding:10px 14px;font-size:12px;color:var(--muted);">${e.position}</td>
+    <td style="padding:10px 14px;font-size:12px;font-weight:700;color:var(--accent);font-family:var(--mono);">${e.timeLabel}</td>
+  </tr>`).join('');
+
+  cont.innerHTML = stats + `<div class="doch-wrap">
+    <table class="doch-table" style="width:auto;min-width:480px;">
+      <thead><tr>
+        <th class="doch-col-name doch-hdr-month" style="min-width:180px;">Jméno</th>
+        <th class="doch-hdr-month" style="min-width:160px;">Pozice</th>
+        <th class="doch-hdr-month" style="min-width:160px;">Čas směny</th>
+      </tr></thead>
+      <tbody>${tbody}</tbody>
+    </table></div>`;
+}
+
+// ── init ───────────────────────────────────────────────────────────
+function brigoInit() {
+  const picker = document.getElementById('brigo-date-pick');
+  if (picker && !picker.value) picker.value = new Date().toISOString().slice(0,10);
+  brigoFilter = 'today';
+  document.getElementById('btn-brigo-today')?.classList.add('active');
+  document.getElementById('btn-brigo-tomorrow')?.classList.remove('active');
+  document.getElementById('btn-brigo-month')?.classList.remove('active');
+  const mSelEl = document.getElementById('brigo-month-select');
+  if (mSelEl) mSelEl.style.display = 'none';
+  brigoLoadData(false).then(() => brigoPopulateMonthSelect());
+}
+
+// ===== END BRIGO DOCHÁZKA =====
 // ===== LOW PERFORMANCE =====
 const LP_APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycby18ZaEgRwkBuov4e2sN_MSxftUfUMZortI1Gx8lGH38E4fOZxQRgoeQnUkV4W6j__Dpg/exec';
 let lpSheetData = null;   // parsed: { names: [], byName: { name: { months:[], attendance:[], asrFill:[] } } }
