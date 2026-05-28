@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>INSIGHT P7</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap');
 
@@ -1724,6 +1725,12 @@
     </div>
 
     <div class="sidebar-section">
+      <div class="sidebar-item" id="sbi-mujvykon" onclick="sidebarNav('mujvykon')">
+        <span class="sidebar-icon">📊</span>
+        <span class="sidebar-label">Můj výkon</span>
+      </div>
+    </div>
+    <div class="sidebar-section">
       <div class="sidebar-item" id="sbi-home" onclick="sidebarNav('home')">
         <span class="sidebar-icon">⌂</span>
         <span class="sidebar-label">Hlavní stránka</span>
@@ -1808,7 +1815,7 @@
         <div class="sidebar-contact-name">Patrik Mitlačevský ↗</div>
         <div class="sidebar-contact-text">Pokud máš nápad ke zlepšení, neváhej mě kontaktovat.</div>
       </div>
-      <div style="text-align:center;margin-top:8px;font-size:9px;font-weight:600;color:var(--dim);letter-spacing:0.08em;white-space:nowrap;transition:opacity 0.15s;" id="sidebar-version">v.1.1</div>
+      <div style="text-align:center;margin-top:8px;font-size:9px;font-weight:600;color:var(--dim);letter-spacing:0.08em;white-space:nowrap;transition:opacity 0.15s;" id="sidebar-version">v.1.2</div>
     </div>
   </div>
 
@@ -1833,7 +1840,12 @@
     <div class="home-greeting" id="home-greeting" style="display:none;"></div>
     <div class="home-section-label">Výkon</div>
     <div class="home-cards">
-      <div class="home-card primary" onclick="sidebarNav('individual')">
+      <div class="home-card primary" onclick="sidebarNav('mujvykon')">
+        <div class="home-card-icon">📊</div>
+        <div class="home-card-title">Můj výkon</div>
+        <div class="home-card-desc">Osobní analýza výkonu — trend, chybějící obrat, provize a průměr s kolegy.</div>
+      </div>
+      <div class="home-card" onclick="sidebarNav('individual')">
         <div class="home-card-icon">◉</div>
         <div class="home-card-title">Individual Performance</div>
         <div class="home-card-desc">Výkon jednotlivých zaměstnanců — plnění ASR, obraty, share služeb.</div>
@@ -1873,6 +1885,56 @@
         <div class="home-card-icon">▦</div>
         <div class="home-card-title">Low Performance</div>
         <div class="home-card-desc">Přehled denních ukazatelů pobočky s plněním po hodinách.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== MŮJ VÝKON ===== -->
+  <div id="view-mujvykon" style="display:none; padding:28px 28px 40px; width:100%; box-sizing:border-box; overflow-y:auto; height:100%;">
+    <div class="view-header" style="padding-bottom:16px;border-bottom:1px solid var(--border);margin-bottom:20px;display:flex;align-items:center;flex-wrap:wrap;gap:10px;">
+      <div class="view-title">Můj výkon</div>
+      <div class="filter-group" style="margin-left:auto; gap:8px;">
+        <span class="filter-label">Zaměstnanec:</span>
+        <select id="mv-person-select" onchange="mvRender()" style="min-width:180px;"></select>
+        <button class="btn" onclick="mvExportPNG()" title="Exportovat jako PNG">⬇ Export PNG</button>
+      </div>
+    </div>
+
+    <div id="mv-warning" style="display:none; background:rgba(232,184,48,0.12); border:1px solid var(--yellow); border-radius:8px; padding:14px 18px; margin-bottom:20px; color:var(--yellow); font-size:13px; font-weight:600; line-height:1.5;">
+      ⚠️ Pro správné fungování záložky Můj výkon je třeba vložit <strong>oba soubory</strong>: Denní hlášení i Docházku.
+    </div>
+
+    <div id="mv-body" style="display:none;">
+      <!-- KPI Strip -->
+      <div id="mv-kpi-strip" style="display:grid; grid-template-columns:repeat(auto-fill,minmax(170px,1fr)); gap:1px; background:var(--border); border:1px solid var(--border); border-radius:var(--radius); overflow:hidden; margin-bottom:24px;"></div>
+
+      <!-- Zbývající obrat -->
+      <div style="background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:20px 22px; margin-bottom:24px;">
+        <div class="section-title" style="margin-bottom:16px;">Chybějící obrat</div>
+        <div id="mv-obrat-rows" style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:16px;"></div>
+      </div>
+
+      <!-- Provize info -->
+      <div style="background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:20px 22px; margin-bottom:24px;">
+        <div class="section-title" style="margin-bottom:16px;">Odhadovaná provize</div>
+        <div id="mv-provize-rows" style="display:grid; grid-template-columns:repeat(auto-fill,minmax(160px,1fr)); gap:16px;"></div>
+      </div>
+
+      <!-- Rozpočítání na den/směnu -->
+      <div style="background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:20px 22px; margin-bottom:24px;">
+        <div class="section-title" style="margin-bottom:16px;">Denní cíl</div>
+        <div style="display:flex; gap:8px; align-items:center; margin-bottom:16px;">
+          <span class="filter-label">Délka směny:</span>
+          <button class="toggle-btn" id="mv-shift8" onclick="mvSetShift(8)">8 hodin</button>
+          <button class="toggle-btn" id="mv-shift12" onclick="mvSetShift(12)">12 hodin</button>
+        </div>
+        <div id="mv-denny-cil" style="display:grid; grid-template-columns:repeat(auto-fill,minmax(200px,1fr)); gap:16px;"></div>
+      </div>
+
+      <!-- Porovnání s kolegy -->
+      <div data-mv-comparison-section style="background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:20px 22px; margin-bottom:24px;">
+        <div class="section-title" style="margin-bottom:16px;">Porovnání s Praha – Centrála (ASR/Hrs Fill)</div>
+        <div id="mv-comparison"></div>
       </div>
     </div>
   </div>
@@ -2375,6 +2437,33 @@
       </div>
     </div>
   </div>
+
+<!-- LOW PERFORMANCE VIEW -->
+<div id="view-low-performance" style="display:none; padding:28px 28px 40px; width:100%; box-sizing:border-box; overflow-y:auto; height:100%;">
+  <div class="view-header" style="padding-bottom:16px;border-bottom:1px solid var(--border);margin-bottom:20px;display:flex;align-items:center;flex-wrap:wrap;gap:10px;">
+    <div class="view-title">Low Performance</div>
+    <div id="lp-load-status" style="font-size:11px;color:var(--muted);margin-left:8px;"></div>
+    <div style="flex:1;"></div>
+    <button id="lp-reload-btn" onclick="lpLoadSheetData()" style="display:flex;align-items:center;gap:6px;background:var(--surface2);border:1px solid var(--border);color:var(--muted);font-family:Helvetica,Arial,sans-serif;font-size:12px;font-weight:600;padding:6px 14px;border-radius:6px;cursor:pointer;transition:all 0.15s;" onmouseover="this.style.borderColor='var(--accent)';this.style.color='var(--accent)'" onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--muted)'">↻ Obnovit data</button>
+  </div>
+
+  <!-- Add employee row -->
+  <div style="display:flex;align-items:center;gap:10px;margin-bottom:24px;flex-wrap:wrap;">
+    <div style="font-size:11px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--dim);">Přidat zaměstnance:</div>
+    <select id="lp-emp-select" style="font-family:Helvetica,Arial,sans-serif;font-size:12px;font-weight:500;padding:6px 10px;border-radius:6px;border:1px solid var(--border);background:var(--surface2);color:var(--text);outline:none;cursor:pointer;min-width:180px;" onfocus="this.style.borderColor='var(--accent)'" onblur="this.style.borderColor='var(--border)'">
+      <option value="">— vyberte jméno —</option>
+    </select>
+    <button onclick="lpAddChart()" style="display:flex;align-items:center;gap:6px;background:var(--accent);border:none;color:#0a1020;font-family:Helvetica,Arial,sans-serif;font-size:12px;font-weight:700;padding:6px 16px;border-radius:6px;cursor:pointer;transition:opacity 0.15s;" onmouseover="this.style.opacity='0.85'" onmouseout="this.style.opacity='1'">+ Přidat graf</button>
+  </div>
+
+  <!-- Charts container -->
+  <div id="lp-charts-container" style="display:flex;flex-direction:column;gap:28px;"></div>
+  <div id="lp-empty-state" style="text-align:center;padding:60px 20px;color:var(--muted);font-size:13px;">
+    <div style="font-size:32px;margin-bottom:12px;opacity:0.3;">▦</div>
+    <div>Vyberte zaměstnance a přidejte graf.</div>
+    <div style="font-size:11px;margin-top:6px;color:var(--dim);">Data se načítají z Google Sheets při každém otevření sekce.</div>
+  </div>
+</div>
 
 <!-- H2H MODAL -->
 <div id="h2h-modal">
@@ -4050,7 +4139,7 @@ function asrtgtExport() {
 
 // ===== DOCUMENTATION =====
 function openDoc() {
-  ['view-home','view-branch','view-users','view-dochazka','view-links','view-kalkulacka','view-asrtgt','view-lunch','view-low-performance'].forEach(id => { const el = document.getElementById(id); if (el) el.style.display = 'none'; });
+  ['view-home','view-branch','view-users','view-dochazka','view-links','view-kalkulacka','view-asrtgt','view-lunch','view-low-performance','view-mujvykon'].forEach(id => { const el = document.getElementById(id); if (el) el.style.display = 'none'; });
   document.getElementById('doc-view').style.display = 'flex';
   if (window._docObserverInit) window._docObserverInit();
   document.body.style.overflow = 'hidden';
@@ -4122,7 +4211,7 @@ function sidebarNav(section) {
   });
 
   // Hide all views
-  ['view-home','view-branch','view-users','view-dochazka','view-links','view-kalkulacka','view-asrtgt','view-lunch','view-low-performance']
+  ['view-home','view-branch','view-users','view-dochazka','view-links','view-kalkulacka','view-asrtgt','view-lunch','view-low-performance','view-mujvykon']
     .forEach(id => { const el = document.getElementById(id); if (el) el.style.display = 'none'; });
 
   // Nav tabs hidden (no longer in nav bar)
@@ -4130,6 +4219,9 @@ function sidebarNav(section) {
 
   if (section === 'home') {
     document.getElementById('view-home').style.display = 'block';
+  } else if (section === 'mujvykon') {
+    document.getElementById('view-mujvykon').style.display = 'block';
+    mvInit();
   } else if (section === 'performance' || section === 'branch') {
     switchView('branch');
   } else if (section === 'individual') {
@@ -4705,6 +4797,682 @@ async function lunchExport() {
     overlay.addEventListener('click', e => { if (e.target === overlay) overlay.remove(); });
   }
 }
+
+// ===== LOW PERFORMANCE =====
+const LP_APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycby18ZaEgRwkBuov4e2sN_MSxftUfUMZortI1Gx8lGH38E4fOZxQRgoeQnUkV4W6j__Dpg/exec';
+let lpSheetData = null;   // parsed: { names: [], byName: { name: { months:[], attendance:[], asrFill:[] } } }
+let lpCharts = [];        // array of { id, name, chartInstance }
+let lpChartCounter = 0;
+
+async function lpLoadSheetData(silent = false) {
+  const statusEl = document.getElementById('lp-load-status');
+  if (statusEl) statusEl.textContent = '⏳ Načítání…';
+  try {
+    const res = await fetch(LP_APPS_SCRIPT_URL);
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const raw = await res.json(); // 2D array: rows x cols
+    lpSheetData = lpParseRaw(raw);
+    if (statusEl) statusEl.textContent = '✓ Data aktuální';
+    lpPopulateSelect();
+    lpCharts.forEach(c => lpRenderChart(c.id, c.name));
+  } catch (err) {
+    if (statusEl) statusEl.textContent = '⚠ Načítání selhalo';
+    if (!silent) console.warn('LP load error:', err);
+  }
+}
+
+function lpParseRaw(rows) {
+  // Structure from "Data" sheet:
+  //   row 0: ["", "Q2/25", "", "Q3/25", ...]           — quarter labels (sparse)
+  //   row 1: ["", "04/25", "", "05/25", ...]            — month labels (sparse)
+  //   row 2: ["Full Name", "04/25 Attendance", "04/25 ASR/Hrs", ...] — col headers
+  //   row 3+: ["Příjmení Jméno", attVal, asrVal, attVal, asrVal, ...]
+
+  const result = { names: [], byName: {} };
+  if (!rows || rows.length < 4) return result;
+
+  const monthRow  = rows[1]; // month labels like "04/25"
+  const headerRow = rows[2]; // "Full Name", "04/25 Attendance", "04/25 ASR/Hrs", ...
+
+  // Build month map: find Attendance columns and pair with ASR col next to them
+  const monthLabels = []; // [{label, attCol, asrCol}]
+  let lastMonth = '';
+  for (let c = 1; c < headerRow.length; c++) {
+    const h = String(headerRow[c] || '').trim();
+    const m = String(monthRow[c] || '').trim() || lastMonth;
+    if (m) lastMonth = m;
+    if (h.includes('Attendance')) {
+      monthLabels.push({ label: m, attCol: c, asrCol: c + 1 });
+    }
+  }
+
+  // Parse employee rows (row index 3+)
+  for (let r = 3; r < rows.length; r++) {
+    const row = rows[r];
+    const name = String(row[0] || '').trim();
+    if (!name) continue;
+
+    const months = [], attendance = [], asrFill = [];
+
+    for (const { label, attCol, asrCol } of monthLabels) {
+      const att = row[attCol];
+      const asr = row[asrCol];
+      if (att === '' || att == null || asr === '' || asr == null) continue;
+
+      const attNum = typeof att === 'number' ? att : parseFloat(String(att).replace(',', '.')) || 0;
+      // ASR is decimal fraction (e.g. 1.1513 = 115.13%) — multiply by 100
+      const asrNum = (typeof asr === 'number' ? asr : parseFloat(String(asr).replace(',', '.')) || 0) * 100;
+
+      months.push(label);
+      attendance.push(attNum);
+      asrFill.push(Math.round(asrNum * 100) / 100);
+    }
+
+    if (months.length > 0) {
+      result.names.push(name);
+      result.byName[name] = { months, attendance, asrFill };
+    }
+  }
+
+  return result;
+}
+
+function lpPopulateSelect() {
+  const sel = document.getElementById('lp-emp-select');
+  if (!sel || !lpSheetData) return;
+  const names = lpSheetData.names;
+  sel.innerHTML = '<option value="">— vyberte jméno —</option>';
+  names.forEach(n => {
+    const opt = document.createElement('option');
+    opt.value = n;
+    opt.textContent = n;
+    sel.appendChild(opt);
+  });
+}
+
+function lpAddChart() {
+  const sel = document.getElementById('lp-emp-select');
+  if (!sel || !sel.value) return;
+  const name = sel.value;
+  // Don't add duplicate
+  if (lpCharts.find(c => c.name === name)) return;
+
+  lpChartCounter++;
+  const id = 'lp-chart-' + lpChartCounter;
+
+  const container = document.getElementById('lp-charts-container');
+  const empty = document.getElementById('lp-empty-state');
+  if (empty) empty.style.display = 'none';
+
+  const card = document.createElement('div');
+  card.id = 'lp-card-' + id;
+  card.style.cssText = 'background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:20px 24px;position:relative;';
+  card.innerHTML = `
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;gap:12px;flex-wrap:wrap;">
+      <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
+        <select id="lp-namesel-${id}" onchange="lpChangeEmployee('${id}', this.value)" style="font-family:Helvetica,Arial,sans-serif;font-size:13px;font-weight:600;padding:6px 10px;border-radius:6px;border:1px solid var(--border);background:var(--surface2);color:var(--text);outline:none;cursor:pointer;" onfocus="this.style.borderColor='var(--accent)'" onblur="this.style.borderColor='var(--border)'">
+          <option value="">— vyberte jméno —</option>
+        </select>
+        <div id="lp-badge-${id}" style="display:none;gap:16px;"></div>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px;flex-shrink:0;">
+        <button onclick="lpExportPNG('${id}')" title="Exportovat jako PNG" style="background:var(--surface2);border:1px solid var(--border);color:var(--muted);font-family:Helvetica,Arial,sans-serif;font-size:11px;font-weight:600;padding:5px 11px;border-radius:6px;cursor:pointer;display:flex;align-items:center;gap:5px;transition:all 0.15s;white-space:nowrap;" onmouseover="this.style.borderColor='var(--accent)';this.style.color='var(--accent)'" onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--muted)'">↓ PNG</button>
+        <button onclick="lpRemoveChart('${id}')" style="background:transparent;border:1px solid var(--border);color:var(--muted);font-size:13px;font-weight:700;width:28px;height:28px;border-radius:6px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all 0.15s;" onmouseover="this.style.borderColor='var(--red)';this.style.color='var(--red)'" onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--muted)'">✕</button>
+      </div>
+    </div>
+    <div style="position:relative;height:260px;">
+      <canvas id="${id}"></canvas>
+    </div>
+  `;
+  container.appendChild(card);
+
+  lpCharts.push({ id, name });
+  lpFillCardSelect(id, name);
+  lpRenderChart(id, name);
+
+  sel.value = '';
+}
+
+function lpFillCardSelect(id, selectedName) {
+  const sel = document.getElementById('lp-namesel-' + id);
+  if (!sel || !lpSheetData) return;
+  sel.innerHTML = '<option value="">— vyberte jméno —</option>';
+  lpSheetData.names.forEach(n => {
+    const opt = document.createElement('option');
+    opt.value = n;
+    opt.textContent = n;
+    if (n === selectedName) opt.selected = true;
+    sel.appendChild(opt);
+  });
+}
+
+function lpChangeEmployee(id, newName) {
+  const c = lpCharts.find(c => c.id === id);
+  if (!c) return;
+  c.name = newName;
+  lpRenderChart(id, newName);
+}
+
+function lpRemoveChart(id) {
+  const idx = lpCharts.findIndex(c => c.id === id);
+  if (idx >= 0) {
+    const ci = lpCharts[idx];
+    if (ci.chartInstance) ci.chartInstance.destroy();
+    lpCharts.splice(idx, 1);
+  }
+  const card = document.getElementById('lp-card-' + id);
+  if (card) card.remove();
+  if (lpCharts.length === 0) {
+    const empty = document.getElementById('lp-empty-state');
+    if (empty) empty.style.display = '';
+  }
+}
+
+function lpRenderChart(id, name) {
+  const ci = lpCharts.find(c => c.id === id);
+  if (ci && ci.chartInstance) { ci.chartInstance.destroy(); ci.chartInstance = null; }
+
+  const badge = document.getElementById('lp-badge-' + id);
+  if (badge) badge.style.display = 'none';
+
+  if (!name || !lpSheetData || !lpSheetData.byName[name]) return;
+
+  const d = lpSheetData.byName[name];
+
+  // Check for current-day data from loaded denní hlášení
+  let currentAtt = null, currentAsr = null;
+  if (DATA.userPerf && DATA.userPerf.length > 0) {
+    const u = DATA.userPerf.find(x => x.name === name);
+    if (u) {
+      currentAtt = u.attendance;
+      currentAsr = u.asrHrsFill != null ? u.asrHrsFill * 100 : null;
+    }
+  }
+
+  // Update badge
+  if (badge && (currentAtt !== null || currentAsr !== null)) {
+    badge.style.display = 'flex';
+    badge.innerHTML = '';
+    if (currentAtt !== null) {
+      badge.innerHTML += `<span style="font-size:11px;font-weight:600;background:var(--surface2);border:1px solid var(--border);border-radius:5px;padding:3px 9px;color:var(--text);">Att dnes: <span style="color:var(--accent2);">${fmtN(currentAtt,1)}</span></span>`;
+    }
+    if (currentAsr !== null) {
+      badge.innerHTML += `<span style="font-size:11px;font-weight:600;background:var(--surface2);border:1px solid var(--border);border-radius:5px;padding:3px 9px;color:var(--text);">ASR/Hrs dnes: <span style="color:var(--accent);">${fmtN(currentAsr,1)}%</span></span>`;
+    }
+  }
+
+  const canvas = document.getElementById(id);
+  if (!canvas) return;
+
+  const isDark = !document.body.classList.contains('light-mode');
+  const gridColor = isDark ? 'rgba(56,82,120,0.25)' : 'rgba(0,0,0,0.07)';
+  const textColor = isDark ? '#6b859a' : '#7a8c9a';
+
+  const chartInstance = new Chart(canvas, {
+    type: 'line',
+    data: {
+      labels: d.months,
+      datasets: [
+        {
+          label: 'Attendance',
+          data: d.attendance,
+          borderColor: '#e05560',
+          backgroundColor: 'rgba(224,85,96,0.08)',
+          pointBackgroundColor: '#e05560',
+          pointRadius: 4,
+          pointHoverRadius: 6,
+          tension: 0.35,
+          yAxisID: 'yAtt',
+          borderWidth: 2,
+        },
+        {
+          label: 'ASR/Hrs Fill (%)',
+          data: d.asrFill,
+          borderColor: '#4e7fb8',
+          backgroundColor: 'rgba(78,127,184,0.08)',
+          pointBackgroundColor: '#4e7fb8',
+          pointRadius: 4,
+          pointHoverRadius: 6,
+          tension: 0.35,
+          yAxisID: 'yAsr',
+          borderWidth: 2,
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      interaction: { mode: 'index', intersect: false },
+      plugins: {
+        legend: {
+          position: 'top',
+          labels: {
+            color: textColor,
+            font: { family: 'Helvetica, Arial, sans-serif', size: 11, weight: '600' },
+            boxWidth: 12, padding: 16
+          }
+        },
+        tooltip: {
+          backgroundColor: 'rgba(10,17,28,0.92)',
+          borderColor: 'rgba(56,82,120,0.5)',
+          borderWidth: 1,
+          titleColor: '#dde8f0',
+          bodyColor: '#dde8f0',
+          padding: 10,
+          callbacks: {
+            label: ctx => {
+              if (ctx.dataset.yAxisID === 'yAsr') return ` ASR/Hrs Fill: ${fmtN(ctx.raw,2)}%`;
+              return ` Attendance: ${fmtN(ctx.raw,2)}`;
+            }
+          }
+        }
+      },
+      scales: {
+        x: {
+          grid: { color: gridColor },
+          ticks: { color: textColor, font: { family: 'Helvetica, Arial, sans-serif', size: 10 } }
+        },
+        yAtt: {
+          type: 'linear',
+          position: 'right',
+          grid: { color: gridColor },
+          ticks: {
+            color: '#e05560',
+            font: { family: 'Helvetica, Arial, sans-serif', size: 10 },
+            callback: v => fmtN(v,0)
+          },
+          title: { display: true, text: 'Attendance', color: '#e05560', font: { size: 10 } }
+        },
+        yAsr: {
+          type: 'linear',
+          position: 'left',
+          grid: { drawOnChartArea: false },
+          ticks: {
+            color: '#4e7fb8',
+            font: { family: 'Helvetica, Arial, sans-serif', size: 10 },
+            callback: v => fmtN(v,0) + '%'
+          },
+          title: { display: true, text: 'ASR/Hrs Fill', color: '#4e7fb8', font: { size: 10 } }
+        }
+      }
+    }
+  });
+
+  if (ci) ci.chartInstance = chartInstance;
+}
+
+function lpExportPNG(id) {
+  const ci = lpCharts.find(c => c.id === id);
+  const name = ci ? ci.name : 'graf';
+
+  // Get the chart canvas
+  const canvas = document.getElementById(id);
+  if (!canvas) return;
+
+  const isDark = !document.body.classList.contains('light-mode');
+  const bgColor = isDark ? '#111318' : '#ffffff';
+
+  // Create export canvas with padding + header + watermark
+  const dpr = 2;
+  const padX = 32, padTop = 52, padBottom = 32;
+  const srcW = canvas.width;
+  const srcH = canvas.height;
+  const outW = srcW + padX * 2 * dpr;
+  const outH = srcH + (padTop + padBottom) * dpr;
+
+  const out = document.createElement('canvas');
+  out.width = outW;
+  out.height = outH;
+  const ctx = out.getContext('2d');
+
+  // Background
+  ctx.fillStyle = bgColor;
+  ctx.fillRect(0, 0, outW, outH);
+
+  // Header — employee name
+  ctx.fillStyle = isDark ? '#dde0ea' : '#1a1d2e';
+  ctx.font = `bold ${14 * dpr}px Helvetica, Arial, sans-serif`;
+  ctx.textBaseline = 'top';
+  ctx.fillText(name, padX * dpr, 14 * dpr);
+
+  // Subtitle
+  ctx.fillStyle = isDark ? '#6b7390' : '#5a607a';
+  ctx.font = `${10 * dpr}px Helvetica, Arial, sans-serif`;
+  ctx.fillText('Attendance vs ASR/Hrs Fill — historický vývoj', padX * dpr, 30 * dpr);
+
+  // Chart canvas
+  ctx.drawImage(canvas, padX * dpr, padTop * dpr);
+
+  // Watermark
+  ctx.fillStyle = isDark ? '#2e3245' : '#c0c4d8';
+  ctx.font = `${9 * dpr}px Helvetica, Arial, sans-serif`;
+  ctx.textBaseline = 'bottom';
+  ctx.fillText('INSIGHT P7 · Low Performance', padX * dpr, outH - 10 * dpr);
+
+  // Download
+  const safe = name.replace(/[^a-zA-Z0-9_\-áčďéěíňóřšťúůýžÁČĎÉĚÍŇÓŘŠŤÚŮÝŽ ]/g, '').trim().replace(/ /g, '_');
+  const a = document.createElement('a');
+  a.href = out.toDataURL('image/png');
+  a.download = `LP_${safe}.png`;
+  a.click();
+}
+
+function dtInit() {
+  // Load sheet data if not yet loaded
+  if (!lpSheetData) {
+    lpLoadSheetData(false);
+  } else {
+    // Just refresh selects for any existing charts
+    lpPopulateSelect();
+    lpCharts.forEach(c => {
+      lpFillCardSelect(c.id, c.name);
+    });
+  }
+}
+
+// ===== MŮJ VÝKON =====
+let mvShiftLen = 8;
+
+function mvSetShift(len) {
+  mvShiftLen = len;
+  document.getElementById('mv-shift8').classList.toggle('active', len === 8);
+  document.getElementById('mv-shift12').classList.toggle('active', len === 12);
+  mvRender();
+}
+
+function mvGetDochazkaEmployee(personName) {
+  // personName is "Příjmení Jméno" (from userPerf)
+  // dochazka stores "Jméno Příjmení" → convert
+  if (!DATA.dochazka) return null;
+  const parts = personName.trim().split(/\s+/);
+  if (parts.length < 2) return null;
+  const docName = parts.slice(1).join(' ') + ' ' + parts[0]; // "Jméno Příjmení"
+
+  // Get current month sheet
+  const MONTHS_CZ = ['Leden','Únor','Březen','Duben','Květen','Červen','Červenec','Srpen','Září','Říjen','Listopad','Prosinec'];
+  const now = new Date();
+  const curMonth = MONTHS_CZ[now.getMonth()];
+  const sheets = DATA.dochazka.SheetNames.filter(s =>
+    MONTHS_CZ.some(m => s.startsWith(m)) && !s.endsWith('25') &&
+    !['List1','test 31.1.','Dovolené'].includes(s)
+  );
+  const sheetName = sheets.find(s => s === curMonth || s.startsWith(curMonth)) || sheets[sheets.length - 1];
+  if (!sheetName) return null;
+
+  const ws = DATA.dochazka.Sheets[sheetName];
+  if (!ws) return null;
+  const raw = XLSX.utils.sheet_to_json(ws, { header: 1, defval: '' });
+
+  for (let r = 5; r < raw.length; r++) {
+    const row = raw[r];
+    const name = String(row[1] || '').trim();
+    if (!name || name === 'Celkem:') continue;
+    const cleanName = name.replace(/\s*\(.*?\)\s*/g, '').trim();
+    if (cleanName.toLowerCase() === docName.toLowerCase()) {
+      return { planned: parseFloat(row[2]) || 0, dovol: parseFloat(row[3]) || 0 };
+    }
+  }
+  return null;
+}
+
+function mvInit() {
+  const hasHlaseni = DATA.userPerf && DATA.userPerf.length > 0;
+  const hasDochazka = !!DATA.dochazka;
+  const warn = document.getElementById('mv-warning');
+  const body = document.getElementById('mv-body');
+
+  if (!hasHlaseni || !hasDochazka) {
+    warn.style.display = 'block';
+    body.style.display = 'none';
+    // Still populate select if possible
+    if (hasHlaseni) mvPopulateSelect();
+    return;
+  }
+  warn.style.display = 'none';
+  body.style.display = 'block';
+  mvPopulateSelect();
+  mvSetShift(mvShiftLen);
+}
+
+function mvPopulateSelect() {
+  const sel = document.getElementById('mv-person-select');
+  const users = (DATA.userPerf || [])
+    .filter(u => u.branch === 'Praha - centrála' && u.attendance > 0)
+    .sort((a, b) => a.name.localeCompare(b.name, 'cs'));
+  const prev = sel.value;
+  sel.innerHTML = users.map(u => `<option value="${u.name.replace(/"/g,'&quot;')}">${u.name}</option>`).join('');
+  if (prev && users.find(u => u.name === prev)) sel.value = prev;
+  mvRender();
+}
+
+function mvRender() {
+  if (!DATA.userPerf || DATA.userPerf.length === 0) return;
+  const sel = document.getElementById('mv-person-select');
+  const personName = sel.value;
+  if (!personName) return;
+
+  const u = DATA.userPerf.find(x => x.name === personName && x.branch === 'Praha - centrála');
+  if (!u) return;
+
+  // --- Dochazka data ---
+  const docEmp = DATA.dochazka ? mvGetDochazkaEmployee(personName) : null;
+  const planH = docEmp ? docEmp.planned : 0;
+  const attendance = parseFloat(u.attendance) || 0;
+  const zbyvH = Math.max(planH - attendance, 0);
+
+  // --- ASR data ---
+  const asrTgt = parseFloat(u.asrHrsTarget) || 0;
+  const asrReal = parseFloat(u.asrHrs) || 0;
+
+  // --- Missing turnover ---
+  // Chybějící aktuální obrat k plnění dosavadního cíle = attendance * (ASR TGT - ASR real)
+  const chybejiciAktualniObrat = attendance * (asrTgt - asrReal);
+  // Chybějící obrat do konce měsíce = (ASR TGT * zbývající hodiny) + aktuální chybějící obrat
+  const chybejiciCelkem = (asrTgt * zbyvH) + Math.max(chybejiciAktualniObrat, 0);
+
+  // --- Revenue split ---
+  // Special rules: Dominik Blažek a Milan Surduk = 60% služby, 40% železo
+  const specialPeople = ['dominik blažek', 'milan surduk'];
+  const isSpecial = specialPeople.some(n => personName.toLowerCase().includes(n));
+  const pctSluzby = isSpecial ? 0.60 : 0.03;
+  const pctZelezo = isSpecial ? 0.40 : 0.97;
+
+  const chybejiciZelezo = chybejiciCelkem * pctZelezo;
+  const chybejiciSluzby = chybejiciCelkem * pctSluzby;
+
+  // --- Commission estimate (on missing turnover) ---
+  const fill = asrTgt > 0 ? (asrReal / asrTgt) : 0;
+  let nasobic;
+  if (fill < 0.75) nasobic = 0;
+  else if (fill >= 1.20) nasobic = 1.2;
+  else nasobic = fill;
+
+  const curZeleze = parseFloat(u.asistRevProducts) || 0;
+  const curSluzby = parseFloat(u.asistRevServices) || 0;
+  const curProv = (curZeleze * 0.0068 + curSluzby * 0.075) * nasobic;
+
+  // Projected if all chybejici is made
+  const projFill = asrTgt > 0 ? ((attendance + zbyvH) * asrTgt > 0 ? Math.min((asrReal + chybejiciCelkem) / ((attendance + zbyvH) * asrTgt), 1.5) : fill) : fill;
+  let projNasobic;
+  if (projFill < 0.75) projNasobic = 0;
+  else if (projFill >= 1.20) projNasobic = 1.2;
+  else projNasobic = projFill;
+  const projZeleze = curZeleze + chybejiciZelezo;
+  const projSluzby = curSluzby + chybejiciSluzby;
+  const projProv = (projZeleze * 0.0068 + projSluzby * 0.075) * projNasobic;
+  const chybejiciProv = projProv - curProv;
+
+  // --- Daily target ---
+  const zbyvSmeny = zbyvH > 0 ? (zbyvH / mvShiftLen) : 0;
+  const denCil = zbyvSmeny > 0 ? (chybejiciCelkem / zbyvSmeny) : 0;
+  const denCilZelezo = denCil * pctZelezo;
+  const denCilSluzby = denCil * pctSluzby;
+
+  // --- Comparison with colleagues ---
+  const colleagues = (DATA.userPerf || [])
+    .filter(x => x.branch === 'Praha - centrála' && x.attendance > 0 && (parseFloat(x.asrHrsFill) || 0) > 0)
+    .map(x => ({ name: x.name, fill: parseFloat(x.asrHrsFill) || 0 }))
+    .sort((a, b) => b.fill - a.fill);
+
+  const myFill = parseFloat(u.asrHrsFill) || 0;
+  const rank = colleagues.findIndex(x => x.name === personName) + 1;
+  const total = colleagues.length;
+  const avgFill = total > 0 ? colleagues.reduce((s, x) => s + x.fill, 0) / total : 0;
+  let level;
+  if (myFill >= avgFill * 1.1) level = { label: 'nadprůměrně', color: 'var(--green)' };
+  else if (myFill >= avgFill * 0.9) level = { label: 'průměrně', color: 'var(--yellow)' };
+  else level = { label: 'podprůměrně', color: 'var(--red)' };
+
+  const fmt = v => Math.round(v).toLocaleString('cs-CZ') + ' Kč';
+  const fmtN2 = v => (parseFloat(v) || 0).toFixed(1).replace('.', ',');
+  const fmtPct = v => ((parseFloat(v) || 0) * 100).toFixed(1).replace('.', ',') + ' %';
+
+  // ---- Render KPI strip ----
+  const kpiItems = [
+    { label: 'Plán hodin', value: fmtN2(planH) + ' h', color: 'var(--accent2)' },
+    { label: 'Odprac. hodin', value: fmtN2(attendance) + ' h', color: 'var(--accent)' },
+    { label: 'Zbývá hodin', value: fmtN2(zbyvH) + ' h', color: zbyvH > 0 ? 'var(--yellow)' : 'var(--green)' },
+    { label: 'ASR/Hrs TGT', value: fmtN2(asrTgt), color: 'var(--muted)' },
+    { label: 'ASR/Hrs Real', value: fmtN2(asrReal), color: 'var(--text)' },
+    { label: 'ASR/Hrs Fill', value: fmtPct(u.asrHrsFill), color: (u.asrHrsFill || 0) >= 1 ? 'var(--green)' : (u.asrHrsFill || 0) >= 0.8 ? 'var(--yellow)' : 'var(--red)' },
+  ];
+  document.getElementById('mv-kpi-strip').innerHTML = kpiItems.map(k => `
+    <div style="padding:18px 20px; background:var(--surface);">
+      <div style="font-size:10px;text-transform:uppercase;letter-spacing:0.1em;color:var(--muted);font-weight:600;margin-bottom:10px;">${k.label}</div>
+      <div style="font-size:20px;font-weight:700;color:${k.color};letter-spacing:-0.02em;">${k.value}</div>
+    </div>
+  `).join('');
+
+  // ---- Render chybějící obrat ----
+  const obratItems = [
+    { label: 'Chybí k dosavadnímu cíli', value: fmt(Math.max(chybejiciAktualniObrat, 0)), desc: `${fmtN2(attendance)} hod × (${fmtN2(asrTgt)} TGT − ${fmtN2(asrReal)} real)` },
+    { label: 'Chybí do konce měsíce', value: fmt(Math.max(chybejiciCelkem, 0)), desc: `celkem k dosažení plánu` },
+    { label: `Z toho Železo (${Math.round(pctZelezo*100)} %)`, value: fmt(Math.max(chybejiciZelezo, 0)), desc: '' },
+    { label: `Z toho Služby (${Math.round(pctSluzby*100)} %)`, value: fmt(Math.max(chybejiciSluzby, 0)), desc: '' },
+  ];
+  document.getElementById('mv-obrat-rows').innerHTML = obratItems.map(row => `
+    <div style="background:var(--surface2); border-radius:6px; padding:14px 16px;">
+      <div style="font-size:10px;text-transform:uppercase;letter-spacing:0.08em;color:var(--muted);font-weight:600;margin-bottom:8px;">${row.label}</div>
+      <div style="font-size:18px;font-weight:700;color:var(--text);">${row.value}</div>
+      ${row.desc ? `<div style="font-size:10px;color:var(--dim);margin-top:4px;">${row.desc}</div>` : ''}
+    </div>
+  `).join('');
+
+  // ---- Provize ----
+  const provItems = [
+    { label: 'Aktuální provize (est.)', value: fmt(curProv), color: 'var(--text)' },
+    { label: 'Ztráta provize', value: fmt(Math.max(chybejiciProv, 0)), color: 'var(--red)' },
+    { label: 'Aktuální multiplikátor', value: nasobic.toFixed(2), color: nasobic === 0 ? 'var(--red)' : nasobic >= 1 ? 'var(--green)' : 'var(--yellow)' },
+  ];
+  document.getElementById('mv-provize-rows').innerHTML = provItems.map(p => `
+    <div style="background:var(--surface2); border-radius:6px; padding:14px 16px;">
+      <div style="font-size:10px;text-transform:uppercase;letter-spacing:0.08em;color:var(--muted);font-weight:600;margin-bottom:8px;">${p.label}</div>
+      <div style="font-size:18px;font-weight:700;color:${p.color};">${p.value}</div>
+    </div>
+  `).join('');
+
+  // ---- Denní cíl ----
+  const denItems = [
+    { label: `Zbývající směny (${mvShiftLen}h)`, value: fmtN2(zbyvSmeny) + ' směn' },
+    { label: 'Cíl na směnu (celkem)', value: fmt(denCil) },
+    { label: `Cíl na směnu (Železo ${Math.round(pctZelezo*100)} %)`, value: fmt(denCilZelezo) },
+    { label: `Cíl na směnu (Služby ${Math.round(pctSluzby*100)} %)`, value: fmt(denCilSluzby) },
+  ];
+  document.getElementById('mv-denny-cil').innerHTML = denItems.map(d => `
+    <div style="background:var(--surface2); border-radius:6px; padding:14px 16px;">
+      <div style="font-size:10px;text-transform:uppercase;letter-spacing:0.08em;color:var(--muted);font-weight:600;margin-bottom:8px;">${d.label}</div>
+      <div style="font-size:18px;font-weight:700;color:var(--text);">${d.value}</div>
+    </div>
+  `).join('');
+
+  // ---- Porovnání ----
+  const compHtml = `
+    <div style="display:flex; gap:24px; align-items:center; flex-wrap:wrap; margin-bottom:16px;">
+      <div>
+        <div style="font-size:10px;text-transform:uppercase;letter-spacing:0.08em;color:var(--muted);font-weight:600;margin-bottom:4px;">Moje ASR/Hrs Fill</div>
+        <div style="font-size:24px;font-weight:700;color:${level.color};">${fmtPct(myFill)}</div>
+      </div>
+      <div>
+        <div style="font-size:10px;text-transform:uppercase;letter-spacing:0.08em;color:var(--muted);font-weight:600;margin-bottom:4px;">Průměr pobočky</div>
+        <div style="font-size:24px;font-weight:700;color:var(--text);">${fmtPct(avgFill)}</div>
+      </div>
+      <div>
+        <div style="font-size:10px;text-transform:uppercase;letter-spacing:0.08em;color:var(--muted);font-weight:600;margin-bottom:4px;">Pořadí</div>
+        <div style="font-size:24px;font-weight:700;color:var(--text);">${rank} / ${total}</div>
+      </div>
+      <div style="background:${level.color}18; border:1px solid ${level.color}; border-radius:8px; padding:10px 18px;">
+        <div style="font-size:13px;font-weight:700;color:${level.color};">Výkonem: ${level.label}</div>
+      </div>
+    </div>
+    <div style="background:var(--surface2); border-radius:6px; overflow:hidden;">
+      <table style="width:100%; font-size:12px; white-space:nowrap; border-collapse:collapse;">
+        <thead>
+          <tr>
+            <th style="padding:8px 12px; text-align:left; font-size:10px; text-transform:uppercase; letter-spacing:0.08em; color:var(--dim); font-weight:700; border-bottom:1px solid var(--border);">#</th>
+            <th style="padding:8px 12px; text-align:left; font-size:10px; text-transform:uppercase; letter-spacing:0.08em; color:var(--dim); font-weight:700; border-bottom:1px solid var(--border);">Jméno</th>
+            <th style="padding:8px 12px; text-align:right; font-size:10px; text-transform:uppercase; letter-spacing:0.08em; color:var(--dim); font-weight:700; border-bottom:1px solid var(--border);">ASR/Hrs Fill</th>
+            <th style="padding:8px 12px; text-align:right; font-size:10px; text-transform:uppercase; letter-spacing:0.08em; color:var(--dim); font-weight:700; border-bottom:1px solid var(--border);"></th>
+          </tr>
+        </thead>
+        <tbody>
+          ${colleagues.map((c, i) => {
+            const fc = c.fill >= 1 ? 'var(--green)' : c.fill >= 0.8 ? 'var(--yellow)' : 'var(--red)';
+            const isMe = c.name === personName;
+            return `<tr style="${isMe ? 'background:rgba(91,106,245,0.12);' : ''}">
+              <td style="padding:8px 12px; border-bottom:1px solid var(--border); color:var(--dim);">${i+1}</td>
+              <td style="padding:8px 12px; border-bottom:1px solid var(--border); font-weight:${isMe?'700':'500'}; color:var(--text);">${isMe ? '▶ ' : ''}${c.name}</td>
+              <td style="padding:8px 12px; border-bottom:1px solid var(--border); text-align:right; font-weight:600; color:${fc};">${fmtPct(c.fill)}</td>
+              <td style="padding:8px 12px; border-bottom:1px solid var(--border); text-align:right; width:120px;">
+                <div style="background:var(--surface3);border-radius:2px;height:6px;overflow:hidden;width:100px;display:inline-block;vertical-align:middle;">
+                  <div style="height:100%;border-radius:2px;width:${Math.min(c.fill*100,100)}%;background:${fc};"></div>
+                </div>
+              </td>
+            </tr>`;
+          }).join('')}
+        </tbody>
+      </table>
+    </div>
+  `;
+  document.getElementById('mv-comparison').innerHTML = compHtml;
+}
+
+function mvExportPNG() {
+  const body = document.getElementById('mv-body');
+  if (!body || body.style.display === 'none') {
+    alert('Nejprve vyber zaměstnance a nahraj oba soubory.');
+    return;
+  }
+  const personName = document.getElementById('mv-person-select').value || 'mujvykon';
+
+  // Temporarily hide comparison section for export
+  const compSection = body.querySelector('[data-mv-comparison-section]');
+  if (compSection) compSection.style.display = 'none';
+
+  const doExport = () => {
+    html2canvas(body, {
+      backgroundColor: getComputedStyle(document.documentElement).getPropertyValue('--bg').trim() || '#080d14',
+      scale: 2,
+      useCORS: true
+    }).then(canvas => {
+      if (compSection) compSection.style.display = '';
+      const a = document.createElement('a');
+      a.href = canvas.toDataURL('image/png');
+      a.download = 'mujvykon_' + personName.replace(/\s+/g,'_') + '.png';
+      a.click();
+    }).catch(() => {
+      if (compSection) compSection.style.display = '';
+    });
+  };
+
+  if (typeof html2canvas !== 'undefined') {
+    doExport();
+  } else {
+    const s = document.createElement('script');
+    s.src = 'https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js';
+    s.onload = doExport;
+    document.head.appendChild(s);
+  }
+}
 </script>
 
 
@@ -4723,7 +5491,7 @@ async function lunchExport() {
 <!-- SIDEBAR -->
 <nav class="doc-nav">
   <div class="doc-nav-logo">
-    <div class="doc-nav-logo-label">Dokumentace · v.1.1</div>
+    <div class="doc-nav-logo-label">Dokumentace · v.1.2</div>
     <div class="doc-nav-logo-title">INSIGHT P7</div>
     <div class="doc-nav-logo-sub">Uživatelská příručka</div>
   </div>
@@ -4770,7 +5538,7 @@ async function lunchExport() {
 
   <!-- HERO -->
   <div class="doc-hero">
-    <div class="doc-hero-eyebrow">INSIGHT P7 · Uživatelská dokumentace · v.1.1</div>
+    <div class="doc-hero-eyebrow">INSIGHT P7 · Uživatelská dokumentace · v.1.2</div>
     <div class="doc-hero-title">Jak pracovat<br>s <span>INSIGHT P7</span></div>
     <div class="doc-hero-desc">
       Kompletní průvodce aplikací pro sledování výkonu poboček a zaměstnanců,
@@ -4784,7 +5552,7 @@ async function lunchExport() {
       <span class="doc-hero-tag">ASR TGT</span>
       <span class="doc-hero-tag">Low Performance</span>
       <span class="doc-hero-tag">Odkazy</span>
-      <span class="doc-hero-tag">v.1.1</span>
+      <span class="doc-hero-tag">v.1.2</span>
     </div>
   </div>
 
@@ -4821,16 +5589,30 @@ async function lunchExport() {
       <div class="callout-body"><strong>Soukromí dat:</strong> Veškerá data zůstávají výhradně v tvém prohlížeči. Žádný soubor se nikam neodesílá ani neukládá na server.</div>
     </div>
 
-    <h3>Co je nového ve v.1.1</h3>
+    <h3>Co je nového ve v.1.2</h3>
     <div class="callout tip">
       <div class="callout-icon">🆕</div>
       <div class="callout-body">
-        <strong>Změny v aktualizaci v.1.1:</strong><br>
+        <strong>Změny v aktualizaci v.1.2:</strong><br>
         • <strong>Low Performance</strong> — Odkaz na Low Performance, určenou ke sledování výkonu po hodinách<br>
         • <strong>Sidebar — nová kategorie TL</strong> — přidána sekce TL mezi Výkon a Ostatní. Obsahuje Low Performance.<br>
         • <strong>Sidebar — ikonky Branch / Individual</strong> — podsekce Branch a Individual mají nyní odlišné ikonky (◫ a 👤) místo šipek.<br>
         • <strong>Důležité odkazy — sekce Pro TL</strong> — přidána nová kategorie s odkazy InsightSofa (NPS), OLAP (PowerBI) a Asana.<br>
         • <strong>Hlavní stránka</strong> — přidána karta Low Performance v sekci TL.
+      </div>
+    </div>
+
+    <h3>Co je nového ve v.1.2</h3>
+    <div class="callout tip">
+      <div class="callout-icon">🆕</div>
+      <div class="callout-body">
+        <strong>Změny v aktualizaci v.1.2:</strong><br>
+        • <strong>Low Performance — grafy</strong> — sekce přepracována: zobrazuje historický vývoj Attendance a ASR/Hrs Fill pro vybraného zaměstnance formou interaktivního grafu.<br>
+        • <strong>Low Performance — živá data</strong> — data se načítají přímo z Google Sheets přes Apps Script API při každém otevření sekce, není třeba nic nahrávat ručně.<br>
+        • <strong>Low Performance — více grafů</strong> — lze přidat neomezený počet grafů najednou, každý pro jiného zaměstnance, s možností přepnutí zaměstnance v záhlaví grafu.<br>
+        • <strong>Low Performance — export PNG</strong> — každý graf lze exportovat jako PNG soubor tlačítkem ↓ PNG.<br>
+        • <strong>Low Performance — aktuální plnění</strong> — pokud je nahrán soubor denního hlášení, zobrazí se u grafu badgy s aktuálními hodnotami Att a ASR/Hrs daného zaměstnance.<br>
+        • <strong>Dokumentace — oprava skrývání obsahu</strong> — při otevření dokumentace se nyní správně skryje obsah poslední zvolené sekce.
       </div>
     </div>
   </section>
@@ -5332,28 +6114,40 @@ async function lunchExport() {
     <div class="section-eyebrow">11 · TL nástroje</div>
     <div class="section-title">Low Performance</div>
     <div class="section-lead">
-      Tabulka pro sledování denního plnění klíčových ukazatelů pobočky v průběhu dne.
+      Sekce pro sledování historického vývoje výkonu zaměstnanců — Attendance a ASR/Hrs Fill — načítaná živě z Google Sheets.
     </div>
 
-    <h3>Struktura tabulky</h3>
-    <p>Tabulka sleduje ukazatele napříč pěti časovými snímky dne — 12h, 14h, 16h, 18h a 20h. Pro každý snímek se zadává skutečná hodnota a automaticky vypočítá procentuální plnění vůči dennímu plánu.</p>
+    <h3>Jak to funguje</h3>
+    <p>Data se při každém otevření sekce automaticky stahují z Google Sheets (list „Data") přes Apps Script API. Není tedy potřeba nic nahrávat ručně — grafy vždy zobrazují aktuální stav tabulky. V záhlaví sekce je tlačítko <strong>↻ Obnovit data</strong> pro manuální refresh a stavový indikátor (⏳ / ✓ / ⚠).</p>
 
+    <h3>Přidání grafu</h3>
+    <p>V horní části sekce vyberte zaměstnance z rozbalovacího menu a klikněte na <strong>+ Přidat graf</strong>. Grafů lze mít najednou neomezeně — každý zobrazuje jednoho zaměstnance. Jména v menu se načítají přímo z tabulky, takže jsou vždy aktuální.</p>
+
+    <h3>Graf — zobrazené metriky</h3>
     <table class="metric-table">
-      <thead><tr><th>Ukazatel</th><th>Plán (TGT)</th><th>Popis a zadávání</th></tr></thead>
+      <thead><tr><th>Metrika</th><th>Barva</th><th>Osa</th><th>Popis</th></tr></thead>
       <tbody>
-        <tr><td>Asistovaný Obrat Celkem</td><td>1 222 222 Kč</td><td>Celkový asistovaný obrat pobočky za den (Kč).</td></tr>
-        <tr><td>Asistovaný Obrat Služby</td><td>77 000 Kč</td><td>Asistovaný obrat služeb za den (Kč).</td></tr>
-        <tr><td>CCT TGT</td><td>50</td><td>Počet CCT za den.</td></tr>
-        <tr><td>NPS Smajlíci</td><td>333</td><td>Počet NPS hodnocení na tabletech.</td></tr>
-        <tr><td>ARos TGT</td><td>1,26 %</td><td>Míra asistence — podíl Asist. obratu služeb na Obratu celkem = Asist. obrat služby ÷ Obrat celkem.</td></tr>
-        <tr><td>Obrat celkem</td><td>—</td><td>Celkový obrat pobočky.</td></tr>
-        <tr><td>MED</td><td>6,8</td><td>Průměrná čekající doba na výdeji</td></tr>
-        <tr><td>HD</td><td>13</td><td>Průměrná čekající doba 10% nejdéle čekajících dokladů</td></tr>
-        <tr><td>Doklady</td><td>—</td><td>Počet vydaných dokladů</td></tr>
-        <tr><td>ASR P7</td><td>3 555 Kč</td><td>ASR/hrs ukazatel pobočky P7 = Asist. obrat celkem ÷ Počet hodin celkem.</td></tr>
-        <tr><td>počet hodin celkem</td><td>—</td><td>Celkové hodiny odpracované k danému času.</td></tr>
+        <tr><td>Attendance</td><td>🔴 červená</td><td>pravá</td><td>Počet odpracovaných hodin za daný měsíc.</td></tr>
+        <tr><td>ASR/Hrs Fill</td><td>🔵 modrá</td><td>levá</td><td>Procentuální plnění ASR/Hrs targetu (hodnoty v %).</td></tr>
       </tbody>
     </table>
+    <p>Osa X zobrazuje měsíce od 04/25 po aktuální měsíc. Prázdné měsíce (zaměstnanec tehdy nepracoval) jsou automaticky vynechány.</p>
+
+    <h3>Ovládání grafu</h3>
+    <p>V záhlaví každého grafu je rozbalovací menu pro přepnutí zaměstnance bez nutnosti odebrání grafu. Vpravo jsou dvě tlačítka: <strong>↓ PNG</strong> pro export grafu jako obrázku a <strong>✕</strong> pro odebrání grafu ze stránky.</p>
+
+    <h3>Export PNG</h3>
+    <p>Tlačítkem <strong>↓ PNG</strong> se graf exportuje jako PNG soubor pojmenovaný podle zaměstnance (např. <code>LP_Horňák_Roman.png</code>). Exportovaný obrázek obsahuje jméno zaměstnance, popis grafu a watermark INSIGHT P7.</p>
+
+    <h3>Aktuální plnění z denního hlášení</h3>
+    <p>Pokud je na úvodní stránce nahrán soubor denního hlášení, zobrazí se u každého grafu automaticky badgy s hodnotami <strong>Att dnes</strong> a <strong>ASR/Hrs dnes</strong> pro daného zaměstnance. Bez nahraného hlášení se badgy nezobrazí.</p>
+
+    <div class="callout tip">
+      <div class="callout-icon">💡</div>
+      <div class="callout-body">
+        Data se načítají ze soukromé tabulky přes Google Apps Script. Pokud se zobrazí ⚠ Načítání selhalo, zkontrolujte připojení k internetu nebo ověřte, zda je Apps Script stále aktivní.
+      </div>
+    </div>
 
   <!-- ═══════════════════════════════════════════════ -->
   <!-- SECTION: DŮLEŽITÉ ODKAZY -->
@@ -5512,7 +6306,7 @@ async function lunchExport() {
     <div class="divider"></div>
 
     <p style="font-size:12px; color: var(--dim); text-align:center;">
-      INSIGHT P7 · Dokumentace · v.1.1 · Vytvořeno pro interní použití SHR P7
+      INSIGHT P7 · Dokumentace · v.1.2 · Vytvořeno pro interní použití SHR P7
     </p>
   </section>
 
