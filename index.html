@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="cs">
 <head>
@@ -627,6 +626,12 @@
   .expand-btn:hover { border-color: var(--accent); color: var(--accent); }
 
   /* ====== USER DETAIL MODAL ====== */
+  #brigo-modal .detail-box { margin-bottom: 14px; }
+  #brigo-modal .detail-row { padding: 11px 16px; }
+  #brigo-modal .detail-box-header { padding: 12px 16px; }
+  #brigo-modal .detail-row-label { font-size: 12px; }
+  #brigo-modal .detail-row-value { font-size: 14px; }
+
   #user-modal {
     display: none;
     position: fixed;
@@ -1757,7 +1762,7 @@
         <span class="sidebar-label">Docházka</span>
       </div>
       <div class="sidebar-item" id="sbi-brigo-dochazka" onclick="sidebarNav('brigo-dochazka')">
-        <span class="sidebar-icon">🧑‍💼</span>
+        <span class="sidebar-icon">◑</span>
         <span class="sidebar-label">Brigo Docházka</span>
       </div>
       <div class="sidebar-item" id="sbi-lunch" onclick="sidebarNav('lunch')">
@@ -2469,7 +2474,7 @@
       </div>
     </div>
   </div>
-  <div id="brigo-content" style="flex:1; overflow-y:auto; overflow-x:auto; padding:24px 28px; width:100%;">
+  <div id="brigo-content" style="flex:1; overflow-y:auto; overflow-x:auto; padding:24px 28px; width:100%; font-family:Helvetica,Arial,sans-serif;">
     <div style="padding:60px;text-align:center;color:var(--muted);font-size:13px;">⏳ Načítání dat z Google Sheets…</div>
   </div>
 </div>
@@ -2614,6 +2619,8 @@ function enterApp() {
   document.getElementById('app').style.display = 'flex';
   document.body.classList.remove('on-upload');
   sidebarNav('home');
+  // Pre-load brigo data in background so it's ready when needed
+  setTimeout(() => brigoLoadData(true), 800);
 }
 
 // Parse pivot cache records from raw xlsx zip bytes
@@ -3285,6 +3292,8 @@ function closeH2H() {
 document.addEventListener('DOMContentLoaded', () => {
   const h2hModal = document.getElementById('h2h-modal');
   if (h2hModal) h2hModal.addEventListener('click', function(e) { if (e.target === this) closeH2H(); });
+  // Pre-load brigo sheets in background
+  setTimeout(() => brigoLoadData(true), 1200);
 });
 
 // ===== USER MODAL =====
@@ -5246,17 +5255,22 @@ function brigoRender() {
       html += `<div style="margin-bottom:20px;">
         <div style="font-size:11px;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;
                     color:var(--accent);border-bottom:1px solid var(--border);padding-bottom:6px;margin-bottom:10px;">
-          ${dayLabel} <span style="color:var(--dim);font-weight:400;">(${emps.length} ${emps.length===1?'brigošo':'brigošů'})</span>
+          ${dayLabel}
         </div>
-        <div class="doch-wrap"><table class="doch-table" style="width:auto;min-width:480px;">
+        <div class="doch-wrap"><table class="doch-table" style="width:600px;table-layout:fixed;">
+          <colgroup>
+            <col style="width:220px;">
+            <col style="width:200px;">
+            <col style="width:180px;">
+          </colgroup>
           <thead><tr>
-            <th class="doch-col-name doch-hdr-month" style="min-width:180px;">Jméno</th>
-            <th class="doch-hdr-month" style="min-width:140px;">Pozice</th>
-            <th class="doch-hdr-month" style="min-width:140px;">Čas směny</th>
+            <th class="doch-col-name doch-hdr-month">Jméno</th>
+            <th class="doch-hdr-month">Pozice</th>
+            <th class="doch-hdr-month">Čas směny</th>
           </tr></thead>
           <tbody>
             ${emps.map(e=>`<tr style="border-bottom:1px solid var(--border);">
-              <td style="padding:8px 14px;font-size:13px;font-weight:600;color:var(--text);">${e.name}</td>
+              <td style="padding:8px 14px;font-size:13px;font-weight:600;color:var(--text);width:200px;cursor:pointer;" onclick="openBrigoDetail('${e.name.replace(/'/g,"\'")}')">${e.name}</td>
               <td style="padding:8px 14px;font-size:12px;color:var(--muted);">${e.position}</td>
               <td style="padding:8px 14px;font-size:12px;font-weight:700;color:var(--accent);font-family:var(--mono);">${e.timeLabel}</td>
             </tr>`).join('')}
@@ -5308,17 +5322,22 @@ function brigoRender() {
   }
 
   const tbody = emps.map(e=>`<tr style="border-bottom:1px solid var(--border);">
-    <td style="padding:10px 14px;font-size:13px;font-weight:600;color:var(--text);">${e.name}</td>
+    <td style="padding:10px 14px;font-size:13px;font-weight:600;color:var(--text);cursor:pointer;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" onclick="openBrigoDetail('${e.name.replace(/'/g,"\'")}')">${e.name}</td>
     <td style="padding:10px 14px;font-size:12px;color:var(--muted);">${e.position}</td>
     <td style="padding:10px 14px;font-size:12px;font-weight:700;color:var(--accent);font-family:var(--mono);">${e.timeLabel}</td>
   </tr>`).join('');
 
   cont.innerHTML = stats + `<div class="doch-wrap">
-    <table class="doch-table" style="width:auto;min-width:480px;">
+    <table class="doch-table" style="width:600px;table-layout:fixed;">
+      <colgroup>
+        <col style="width:220px;">
+        <col style="width:200px;">
+        <col style="width:180px;">
+      </colgroup>
       <thead><tr>
-        <th class="doch-col-name doch-hdr-month" style="min-width:180px;">Jméno</th>
-        <th class="doch-hdr-month" style="min-width:160px;">Pozice</th>
-        <th class="doch-hdr-month" style="min-width:160px;">Čas směny</th>
+        <th class="doch-col-name doch-hdr-month">Jméno</th>
+        <th class="doch-hdr-month">Pozice</th>
+        <th class="doch-hdr-month">Čas směny</th>
       </tr></thead>
       <tbody>${tbody}</tbody>
     </table></div>`;
@@ -5337,6 +5356,92 @@ function brigoInit() {
   brigoLoadData(false).then(() => brigoPopulateMonthSelect());
 }
 
+
+// ── Brigo detail modal ────────────────────────────────────────────
+
+function closeBrigoModal() {
+  const m = document.getElementById('brigo-modal');
+  if (m) m.style.display = 'none';
+}
+
+function openBrigoDetail(name) {
+  const modal  = document.getElementById('brigo-modal');
+  const nameEl = document.getElementById('brigo-modal-name');
+  const subEl  = document.getElementById('brigo-modal-sub');
+  const body   = document.getElementById('brigo-modal-body');
+  if (!modal || !body) return;
+
+  nameEl.textContent = name;
+  subEl.textContent  = 'Brigádník';
+  body.innerHTML = '<div style="padding:32px;text-align:center;color:var(--muted);font-size:13px;">⏳ Načítání hodin…</div>';
+  modal.style.display = 'flex';
+
+  const MONTHS_ORDER = ['Leden','Únor','Březen','Duben','Květen','Červen',
+                        'Červenec','Srpen','Září','Říjen','Listopad','Prosinec'];
+  const normS = s => s.normalize('NFD').replace(/[\u0300-\u036f]/g,'');
+  const sheetKey = s => {
+    const n = normS(s);
+    return parseInt(n.slice(-2)) * 100 + MONTHS_ORDER.findIndex(m => n.startsWith(normS(m)));
+  };
+
+  // Ensure previous 3 months are cached
+  async function ensurePrev3() {
+    const now = new Date();
+    const toLoad = [];
+    for (let i = 2; i >= 0; i--) {
+      const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+      const actual = brigoFindSheet(brigoSheetForDate(d));
+      if (actual && brigoCache[actual] === undefined) toLoad.push(actual);
+    }
+    if (toLoad.length > 0) await Promise.all(toLoad.map(s => brigoLoadSheet(s)));
+  }
+
+  ensurePrev3().then(() => {
+    // Aggregate hours per sheet for this person
+    const monthHours = [];
+    for (const [sheetName, cached] of Object.entries(brigoCache)) {
+      if (!cached || !cached.raw) continue;
+      const parsed = cached._parsed || (cached._parsed = brigoParseFull(cached.raw));
+      const entries = parsed.filter(e => e.name === name);
+      if (entries.length === 0) continue;
+      const byDay = {};
+      for (const e of entries) {
+        const dk = `${e.date.year}-${e.date.month}-${e.date.day}`;
+        byDay[dk] = (byDay[dk] || 0) + (e.timeTo - e.timeFrom);
+      }
+      monthHours.push({ sheet: sheetName, hours: Object.values(byDay).reduce((a,b) => a+b, 0) });
+    }
+    monthHours.sort((a, b) => sheetKey(a.sheet) - sheetKey(b.sheet));
+
+    const last3      = monthHours.slice(-3);
+    const last3Total = last3.reduce((s, m) => s + m.hours, 0);
+
+    if (monthHours.length === 0) {
+      body.innerHTML = `<div class="detail-box"><div class="detail-box-body">
+        <div class="detail-row"><span class="detail-row-label" style="font-style:italic;color:var(--dim);">Žádná data k dispozici</span></div>
+      </div></div>`;
+      return;
+    }
+
+    const rowsHtml = monthHours.map(m => `
+      <div class="detail-row">
+        <span class="detail-row-label">${m.sheet}</span>
+        <span class="detail-row-value" style="color:var(--accent);font-family:var(--mono);">${m.hours} h</span>
+      </div>`).join('');
+
+    body.innerHTML = `
+      <div class="detail-box">
+        <div class="detail-box-header">📅 Plánované hodiny po měsících</div>
+        <div class="detail-box-body">
+          ${rowsHtml}
+          <div class="detail-row" style="border-top:2px solid var(--border);margin-top:2px;">
+            <span class="detail-row-label" style="font-weight:700;color:var(--text);">Posledních ${last3.length} měsíce celkem</span>
+            <span class="detail-row-value" style="color:var(--accent);font-family:var(--mono);font-size:15px;font-weight:700;">${last3Total} h</span>
+          </div>
+        </div>
+      </div>`;
+  });
+}
 // ===== END BRIGO DOCHÁZKA =====
 // ===== LOW PERFORMANCE =====
 const LP_APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycby18ZaEgRwkBuov4e2sN_MSxftUfUMZortI1Gx8lGH38E4fOZxQRgoeQnUkV4W6j__Dpg/exec';
@@ -6854,5 +6959,19 @@ function mvExportPNG() {
 </div>
 </div>
 
+
+<!-- BRIGO DETAIL MODAL -->
+<div id="brigo-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:400;padding:32px;align-items:center;justify-content:center;backdrop-filter:blur(6px);" onclick="if(event.target===this)closeBrigoModal()">
+  <div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;width:100%;max-width:760px;overflow:hidden;font-family:Helvetica,Arial,sans-serif;">
+    <div class="modal-header">
+      <div>
+        <div class="modal-name" id="brigo-modal-name"></div>
+        <div class="modal-branch" id="brigo-modal-sub"></div>
+      </div>
+      <button class="modal-close" onclick="closeBrigoModal()">✕ Zavřít</button>
+    </div>
+    <div id="brigo-modal-body" style="padding:24px 28px;"></div>
+  </div>
+</div>
 </body>
 </html>
