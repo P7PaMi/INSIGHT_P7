@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>INSIGHT P7</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%23080d14'/%3E%3Crect x='6' y='17' width='4.5' height='9' rx='1' fill='%234e7fb8'/%3E%3Crect x='13.75' y='12' width='4.5' height='14' rx='1' fill='%237abf2e'/%3E%3Crect x='21.5' y='7' width='4.5' height='19' rx='1' fill='%23a8d060'/%3E%3C/svg%3E">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <style>
@@ -1524,7 +1525,38 @@
   @media (max-width: 900px) {
     .doc-nav { display: none; }
     .doc-main { padding: 32px 24px 60px; max-width: 100%; }
+    #mv-prov-den-wrap { grid-template-columns: 1fr !important; }
   }
+
+  /* ====== MŮJ VÝKON – nástroje ====== */
+  .mv-tool-card {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--accent);
+    border-radius: 6px;
+    padding: 14px 16px;
+  }
+  .mv-tool-card .mv-tool-text { font-size: 13px; color: var(--text); line-height: 1.55; margin-bottom: 10px; }
+  .mv-tool-links { display: flex; flex-wrap: wrap; gap: 8px; }
+  .mv-tool-link {
+    display: inline-flex; align-items: center; gap: 6px;
+    font-size: 12px; font-weight: 600; text-decoration: none;
+    color: var(--accent); background: rgba(122,191,46,0.10);
+    border: 1px solid var(--accent); border-radius: 6px;
+    padding: 6px 12px; transition: background 0.15s;
+  }
+  .mv-tool-link:hover { background: rgba(122,191,46,0.22); }
+  .mv-modal-section-title {
+    font-size: 12px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase;
+    color: var(--accent); margin: 22px 0 10px;
+  }
+  .mv-modal-section-title:first-child { margin-top: 0; }
+  .mv-modal-p { font-size: 13px; color: var(--text); line-height: 1.6; margin: 0 0 12px; }
+  .mv-modal-item { margin-bottom: 14px; }
+  .mv-modal-item-head { font-size: 13px; font-weight: 700; color: var(--text); margin-bottom: 3px; }
+  .mv-modal-item-head a { color: var(--accent); text-decoration: none; }
+  .mv-modal-item-head a:hover { text-decoration: underline; }
+  .mv-modal-item-desc { font-size: 12px; color: var(--muted); line-height: 1.55; }
 
   /* scroll behavior */
   html { scroll-behavior: smooth; }
@@ -1732,7 +1764,7 @@
 
     <div class="sidebar-section">
       <div class="sidebar-item" id="sbi-mujvykon" onclick="sidebarNav('mujvykon')">
-        <span class="sidebar-icon">📊</span>
+        <span class="sidebar-icon">◰</span>
         <span class="sidebar-label">Můj výkon</span>
       </div>
     </div>
@@ -1841,6 +1873,56 @@
   </div>
 </div>
 
+<!-- MŮJ VÝKON – ZOBRAZIT VÍCE MODAL -->
+<div id="mv-tools-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:400;padding:32px;align-items:center;justify-content:center;backdrop-filter:blur(6px);" onclick="if(event.target===this)closeMvToolsModal()">
+  <div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;width:100%;max-width:720px;max-height:86vh;display:flex;flex-direction:column;overflow:hidden;font-family:Helvetica,Arial,sans-serif;">
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:20px 26px;border-bottom:1px solid var(--border);">
+      <div style="font-size:17px;font-weight:700;color:var(--text);">Na čem potřebuji zapracovat — rozcestník</div>
+      <button onclick="closeMvToolsModal()" style="background:transparent;border:1px solid var(--border);color:var(--muted);border-radius:6px;padding:5px 11px;cursor:pointer;font-size:12px;font-family:Helvetica,Arial,sans-serif;font-weight:600;transition:all 0.15s;" onmouseover="this.style.borderColor='var(--muted)'" onmouseout="this.style.borderColor='var(--border)'">✕ Zavřít</button>
+    </div>
+    <div style="padding:24px 28px;overflow-y:auto;">
+
+      <div class="mv-modal-section-title">Cross-sell a Upsell</div>
+      <p class="mv-modal-p">Základní podstatou je vytěžení každého zákazníka jak nejlépe umíme — a to tím, že zároveň poskytneme nejlepší možný servis. V praxi to znamená, že k hlavnímu produktu nabídneme příslušenství, ale zároveň se doptáváme zákazníka, zda nepotřebuje něco dalšího, co nemusí mít spojitost s „hlavním produktem". Celý rozhovor pak obalíme upsellem, kdy zákazníkovi na základě jeho potřeb doporučíme službu, ze které může benefitovat.</p>
+
+      <div class="mv-modal-section-title">Procesní rozvoj a přehled</div>
+      <div class="mv-modal-item">
+        <div class="mv-modal-item-head"><a href="https://notebooklm.google.com/notebook/33f161d4-b294-40f3-b5e9-4789b869bc98" target="_blank" rel="noopener">Žaneta ↗</a></div>
+        <div class="mv-modal-item-desc">Žaneta je interní P7 chatbot, vytvořená pomocí nástroje notebookLM. Zná obchodní podmínky, poradí s prodejem přes užitek a metoda 5P jí není cizí. Zároveň zná tvůj mzdový model a umí ti upravit TGT dle počtu odpracovaných hodin mimo tvou plánovanou pozici. Mimo jiné se vyzná v Egje, Competentu a konzoli z pohledu prodejce — s vytvářením zakázek ti pomůže, zná typy plateb, dobropisů i postup ze strany LOG.</div>
+      </div>
+      <div class="mv-modal-item">
+        <div class="mv-modal-item-head"><a href="https://gemini.google.com/gem/1l5mZZDKf2HFcBRQvrIhk4-osehmqSldN?usp=sharing" target="_blank" rel="noopener">Product Research ↗</a></div>
+        <div class="mv-modal-item-desc">Gemini agent vytvořený Romanem Horňákem, který na požádání proklepne známé TECH weby (The Verge, GSMArena, Tom's Hardware a další), odfiltruje nezajímavý balast, příslušenství a spotřební materiál a vyhodí ti hardwarové novinky či hity, které je dobré znát. Snaží se vždy vytáhnout alespoň jeden produkt ke každé kategorii (Vlajková loď, Inovace, Cena-Výkon, Skrytý klenot). Ke každému produktu sumarizuje krátké info, proč by tě to mělo zajímat, jaké jsou klíčové evoluce, cenovku a zda máme zalistováno na Alze, či nikoliv.</div>
+      </div>
+
+      <div class="mv-modal-section-title">Trénink prodejních dovedností</div>
+      <div class="mv-modal-item">
+        <div class="mv-modal-item-head"><a href="https://chatgpt.com/g/g-69a47d10742481918080d44399ee6e5a-prodejni-coach-5p" target="_blank" rel="noopener">Prodejní coach 5P ↗</a></div>
+        <div class="mv-modal-item-desc">Coach především pro nové prodejce Alza.cz. Simuluje realistické zákazníky i prodejní situace, vede rozhovor dle metodiky 5P a po každé simulaci dává konkrétní zpětnou vazbu, skóre a doporučení, jak zvýšit konverzi, marži i prodej služeb a uzavírat rozhovor sebevědoměji. Na konci každé simulace, kterou si určíš ty sám, požádej coache o vyhodnocení.</div>
+      </div>
+      <div class="mv-modal-item">
+        <div class="mv-modal-item-head"><a href="https://chatgpt.com/g/g-6971e68e98b08191b56f28d53387995f-alza-sluzby-expert" target="_blank" rel="noopener">Službový expert (ChatGPT) ↗</a></div>
+        <div class="mv-modal-item-desc">Trenér služeb Alza je specializovaný asistent zaměřený na podporu prodeje služeb v prodejní síti. Pomáhá vysvětlovat podmínky a benefity jednotlivých služeb, trénovat prodejní rozhovory formou simulace zákazníka a poskytovat zpětnou vazbu na vedení obchodních jednání. Vychází z interních podkladů, argumentací a postupů, díky čemuž pomáhá prodejcům lépe zjišťovat potřeby zákazníků, pracovat s námitkami a zvyšovat úspěšnost prodeje.</div>
+      </div>
+
+      <div class="mv-modal-section-title">Rozvoj bez AI</div>
+      <div class="mv-modal-item">
+        <div class="mv-modal-item-head">Ranní porady</div>
+        <div class="mv-modal-item-desc">Určíš si zde priority na daný den / krátké období, za kterými si jdeš. V rámci porad je pak můžeš vyhodnocovat a ohlédnout se za tím, co se povedlo / nepovedlo.</div>
+      </div>
+      <div class="mv-modal-item">
+        <div class="mv-modal-item-head">AlzaUp</div>
+        <div class="mv-modal-item-desc">Tvůj TL ti naslouchá a dává ti ZV ve chvíli, kdy je co zlepšovat. Vnímej tyto rady a mysli na ně během dalších prodejních rozhovorů.</div>
+      </div>
+      <div class="mv-modal-item">
+        <div class="mv-modal-item-head">Hodnotící rozhovor</div>
+        <div class="mv-modal-item-desc">Retrospektivní nástroj k vyhodnocení měsíce, ale zároveň k nastavení akčních kroků na měsíc následující.</div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
   <!-- MAIN CONTENT -->
   <div id="main-content">
 
@@ -1851,7 +1933,7 @@
     <div class="home-section-label">Výkon</div>
     <div class="home-cards">
       <div class="home-card primary" onclick="sidebarNav('mujvykon')">
-        <div class="home-card-icon">📊</div>
+        <div class="home-card-icon">◰</div>
         <div class="home-card-title">Můj výkon</div>
         <div class="home-card-desc">Osobní analýza výkonu — trend, chybějící obrat, provize a průměr s kolegy.</div>
       </div>
@@ -1916,29 +1998,41 @@
 
     <div id="mv-body" style="display:none;">
       <!-- KPI Strip -->
-      <div id="mv-kpi-strip" style="display:grid; grid-template-columns:repeat(auto-fill,minmax(170px,1fr)); gap:1px; background:var(--border); border:1px solid var(--border); border-radius:var(--radius); overflow:hidden; margin-bottom:24px;"></div>
+      <div id="mv-kpi-strip" style="display:grid; grid-template-columns:repeat(auto-fit,minmax(120px,1fr)); gap:1px; background:var(--border); border:1px solid var(--border); border-radius:var(--radius); overflow:hidden; margin-bottom:24px;"></div>
 
       <!-- Zbývající obrat -->
       <div style="background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:20px 22px; margin-bottom:24px;">
-        <div class="section-title" style="margin-bottom:16px;">Chybějící obrat</div>
+        <div class="section-title" style="margin-bottom:16px;">Chybějící obrat k 100% plnění</div>
         <div id="mv-obrat-rows" style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:16px;"></div>
       </div>
 
-      <!-- Provize info -->
-      <div style="background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:20px 22px; margin-bottom:24px;">
-        <div class="section-title" style="margin-bottom:16px;">Odhadovaná provize</div>
-        <div id="mv-provize-rows" style="display:grid; grid-template-columns:repeat(auto-fill,minmax(160px,1fr)); gap:16px;"></div>
+      <!-- Provize + Denní cíl vedle sebe -->
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:24px; margin-bottom:24px;" id="mv-prov-den-wrap">
+        <!-- Provize info -->
+        <div style="background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:20px 22px;">
+          <div class="section-title" style="margin-bottom:16px;">Odhadovaná provize</div>
+          <div id="mv-provize-rows" style="display:grid; grid-template-columns:repeat(auto-fill,minmax(150px,1fr)); gap:16px;"></div>
+        </div>
+
+        <!-- Rozpočítání na den/směnu -->
+        <div style="background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:20px 22px;">
+          <div class="section-title" style="margin-bottom:16px;">Denní cíl</div>
+          <div style="display:flex; gap:8px; align-items:center; margin-bottom:16px;">
+            <span class="filter-label">Délka směny:</span>
+            <button class="toggle-btn" id="mv-shift8" onclick="mvSetShift(8)">8 hodin</button>
+            <button class="toggle-btn" id="mv-shift12" onclick="mvSetShift(12)">12 hodin</button>
+          </div>
+          <div id="mv-denny-cil" style="display:grid; grid-template-columns:repeat(auto-fill,minmax(150px,1fr)); gap:16px;"></div>
+        </div>
       </div>
 
-      <!-- Rozpočítání na den/směnu -->
+      <!-- Na čem potřebuji zapracovat -->
       <div style="background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:20px 22px; margin-bottom:24px;">
-        <div class="section-title" style="margin-bottom:16px;">Denní cíl</div>
-        <div style="display:flex; gap:8px; align-items:center; margin-bottom:16px;">
-          <span class="filter-label">Délka směny:</span>
-          <button class="toggle-btn" id="mv-shift8" onclick="mvSetShift(8)">8 hodin</button>
-          <button class="toggle-btn" id="mv-shift12" onclick="mvSetShift(12)">12 hodin</button>
+        <div class="section-title" style="margin-bottom:16px;">Na čem potřebuji zapracovat</div>
+        <div id="mv-tools" style="display:flex; flex-direction:column; gap:14px;"></div>
+        <div style="margin-top:18px; text-align:center;">
+          <button class="btn" onclick="openMvToolsModal()" style="font-weight:600;">Zobrazit více</button>
         </div>
-        <div id="mv-denny-cil" style="display:grid; grid-template-columns:repeat(auto-fill,minmax(200px,1fr)); gap:16px;"></div>
       </div>
 
       <!-- Porovnání s kolegy -->
@@ -5833,6 +5927,13 @@ function mvSetShift(len) {
   mvRender();
 }
 
+function openMvToolsModal() {
+  document.getElementById('mv-tools-modal').style.display = 'flex';
+}
+function closeMvToolsModal() {
+  document.getElementById('mv-tools-modal').style.display = 'none';
+}
+
 function mvGetDochazkaEmployee(personName) {
   // personName is "Příjmení Jméno" (from userPerf)
   // dochazka stores "Jméno Příjmení" → convert
@@ -5917,11 +6018,10 @@ function mvRender() {
   const asrTgt = parseFloat(u.asrHrsTarget) || 0;
   const asrReal = parseFloat(u.asrHrs) || 0;
 
-  // --- Missing turnover ---
-  // Chybějící aktuální obrat k plnění dosavadního cíle = attendance * (ASR TGT - ASR real)
-  const chybejiciAktualniObrat = attendance * (asrTgt - asrReal);
-  // Chybějící obrat do konce měsíce = (ASR TGT * zbývající hodiny) + aktuální chybějící obrat
-  const chybejiciCelkem = (asrTgt * zbyvH) + Math.max(chybejiciAktualniObrat, 0);
+  // --- Current revenue ---
+  const curZeleze = parseFloat(u.asistRevProducts) || 0;
+  const curSluzby = parseFloat(u.asistRevServices) || 0;
+  const curRev = curZeleze + curSluzby; // aktuální asistovaný obrat (železo + služby)
 
   // --- Revenue split ---
   // Special rules: Dominik Blažek a Milan Surduk = 60% služby, 40% železo
@@ -5930,34 +6030,38 @@ function mvRender() {
   const pctSluzby = isSpecial ? 0.60 : 0.03;
   const pctZelezo = isSpecial ? 0.40 : 0.97;
 
-  const chybejiciZelezo = chybejiciCelkem * pctZelezo;
-  const chybejiciSluzby = chybejiciCelkem * pctSluzby;
+  // --- Missing turnover ---
+  // Chybí k dosavadnímu cíli (se znaménkem): aktuální obrat − ASR TGT × odprac. hodiny
+  // kladná hodnota = uživatel přeplňuje, záporná = neplní
+  const chybejiciAktualniObrat = curRev - (asrTgt * attendance);
+  // Chybí do konce měsíce = (plán hodin × ASR TGT) − aktuální asistovaný obrat
+  const chybejiciCelkem = (planH * asrTgt) - curRev;
+  const chybejiciCelkemPos = Math.max(chybejiciCelkem, 0);
 
-  // --- Commission estimate (on missing turnover) ---
+  const chybejiciZelezo = chybejiciCelkemPos * pctZelezo;
+  const chybejiciSluzby = chybejiciCelkemPos * pctSluzby;
+
+  // --- Commission estimate ---
   const fill = asrTgt > 0 ? (asrReal / asrTgt) : 0;
   let nasobic;
   if (fill < 0.75) nasobic = 0;
   else if (fill >= 1.20) nasobic = 1.2;
   else nasobic = fill;
 
-  const curZeleze = parseFloat(u.asistRevProducts) || 0;
-  const curSluzby = parseFloat(u.asistRevServices) || 0;
   const curProv = (curZeleze * 0.0068 + curSluzby * 0.075) * nasobic;
 
-  // Projected if all chybejici is made
-  const projFill = asrTgt > 0 ? ((attendance + zbyvH) * asrTgt > 0 ? Math.min((asrReal + chybejiciCelkem) / ((attendance + zbyvH) * asrTgt), 1.5) : fill) : fill;
-  let projNasobic;
-  if (projFill < 0.75) projNasobic = 0;
-  else if (projFill >= 1.20) projNasobic = 1.2;
-  else projNasobic = projFill;
-  const projZeleze = curZeleze + chybejiciZelezo;
-  const projSluzby = curSluzby + chybejiciSluzby;
-  const projProv = (projZeleze * 0.0068 + projSluzby * 0.075) * projNasobic;
-  const chybejiciProv = projProv - curProv;
+  // Ztráta provize — počítá se POUZE vůči obratu chybějícímu k DOSAVADNÍMU cíli (ne ke konci měsíce)
+  const missingToTarget = Math.max((asrTgt * attendance) - curRev, 0);
+  const missZelezo = missingToTarget * pctZelezo;
+  const missSluzby = missingToTarget * pctSluzby;
+  // při dosažení dosavadního cíle je plnění = 100 % → násobič 1.0
+  const targetNasobic = 1.0;
+  const targetProv = ((curZeleze + missZelezo) * 0.0068 + (curSluzby + missSluzby) * 0.075) * targetNasobic;
+  const ztrataProv = Math.max(targetProv - curProv, 0);
 
   // --- Daily target ---
   const zbyvSmeny = zbyvH > 0 ? (zbyvH / mvShiftLen) : 0;
-  const denCil = zbyvSmeny > 0 ? (chybejiciCelkem / zbyvSmeny) : 0;
+  const denCil = zbyvSmeny > 0 ? (chybejiciCelkemPos / zbyvSmeny) : 0;
   const denCilZelezo = denCil * pctZelezo;
   const denCilSluzby = denCil * pctSluzby;
 
@@ -5977,6 +6081,7 @@ function mvRender() {
   else level = { label: 'podprůměrně', color: 'var(--red)' };
 
   const fmt = v => Math.round(v).toLocaleString('cs-CZ') + ' Kč';
+  const fmtSigned = v => (v >= 0 ? '+' : '−') + Math.round(Math.abs(v)).toLocaleString('cs-CZ') + ' Kč';
   const fmtN2 = v => (parseFloat(v) || 0).toFixed(1).replace('.', ',');
   const fmtPct = v => ((parseFloat(v) || 0) * 100).toFixed(1).replace('.', ',') + ' %';
 
@@ -5988,6 +6093,7 @@ function mvRender() {
     { label: 'ASR/Hrs TGT', value: fmtN2(asrTgt), color: 'var(--muted)' },
     { label: 'ASR/Hrs Real', value: fmtN2(asrReal), color: 'var(--text)' },
     { label: 'ASR/Hrs Fill', value: fmtPct(u.asrHrsFill), color: (u.asrHrsFill || 0) >= 1 ? 'var(--green)' : (u.asrHrsFill || 0) >= 0.8 ? 'var(--yellow)' : 'var(--red)' },
+    { label: '% Share služeb', value: fmtPct(u.shareASRServices), color: (u.shareASRServices || 0) >= 0.03 ? 'var(--green)' : (u.shareASRServices || 0) >= 0.015 ? 'var(--yellow)' : 'var(--red)' },
   ];
   document.getElementById('mv-kpi-strip').innerHTML = kpiItems.map(k => `
     <div style="padding:18px 20px; background:var(--surface);">
@@ -5998,15 +6104,20 @@ function mvRender() {
 
   // ---- Render chybějící obrat ----
   const obratItems = [
-    { label: 'Chybí k dosavadnímu cíli', value: fmt(Math.max(chybejiciAktualniObrat, 0)), desc: `${fmtN2(attendance)} hod × (${fmtN2(asrTgt)} TGT − ${fmtN2(asrReal)} real)` },
-    { label: 'Chybí do konce měsíce', value: fmt(Math.max(chybejiciCelkem, 0)), desc: `celkem k dosažení plánu` },
-    { label: `Z toho Železo (${Math.round(pctZelezo*100)} %)`, value: fmt(Math.max(chybejiciZelezo, 0)), desc: '' },
-    { label: `Z toho Služby (${Math.round(pctSluzby*100)} %)`, value: fmt(Math.max(chybejiciSluzby, 0)), desc: '' },
+    { label: 'Chybí k dosavadnímu cíli',
+      value: fmtSigned(chybejiciAktualniObrat),
+      color: chybejiciAktualniObrat >= 0 ? 'var(--green)' : 'var(--red)',
+      desc: chybejiciAktualniObrat >= 0 ? 'aktuálně přeplňuješ dosavadní cíl' : 'aktuálně neplníš dosavadní cíl' },
+    { label: 'Chybí do konce měsíce',
+      value: fmt(chybejiciCelkemPos),
+      desc: `(plán ${fmtN2(planH)} h × ${fmtN2(asrTgt)} TGT) − obrat` },
+    { label: `Z toho Železo (${Math.round(pctZelezo*100)} %)`, value: fmt(chybejiciZelezo), desc: '' },
+    { label: `Z toho Služby (${Math.round(pctSluzby*100)} %)`, value: fmt(chybejiciSluzby), desc: '' },
   ];
   document.getElementById('mv-obrat-rows').innerHTML = obratItems.map(row => `
     <div style="background:var(--surface2); border-radius:6px; padding:14px 16px;">
       <div style="font-size:10px;text-transform:uppercase;letter-spacing:0.08em;color:var(--muted);font-weight:600;margin-bottom:8px;">${row.label}</div>
-      <div style="font-size:18px;font-weight:700;color:var(--text);">${row.value}</div>
+      <div style="font-size:18px;font-weight:700;color:${row.color || 'var(--text)'};">${row.value}</div>
       ${row.desc ? `<div style="font-size:10px;color:var(--dim);margin-top:4px;">${row.desc}</div>` : ''}
     </div>
   `).join('');
@@ -6014,8 +6125,8 @@ function mvRender() {
   // ---- Provize ----
   const provItems = [
     { label: 'Aktuální provize (est.)', value: fmt(curProv), color: 'var(--text)' },
-    { label: 'Ztráta provize', value: fmt(Math.max(chybejiciProv, 0)), color: 'var(--red)' },
-    { label: 'Aktuální multiplikátor', value: nasobic.toFixed(2), color: nasobic === 0 ? 'var(--red)' : nasobic >= 1 ? 'var(--green)' : 'var(--yellow)' },
+    { label: 'Ztráta provize', value: fmt(ztrataProv), color: ztrataProv > 0 ? 'var(--red)' : 'var(--green)' },
+    { label: 'Aktuální násobič', value: nasobic.toFixed(2), color: nasobic === 0 ? 'var(--red)' : nasobic >= 1 ? 'var(--green)' : 'var(--yellow)' },
   ];
   document.getElementById('mv-provize-rows').innerHTML = provItems.map(p => `
     <div style="background:var(--surface2); border-radius:6px; padding:14px 16px;">
@@ -6035,6 +6146,58 @@ function mvRender() {
     <div style="background:var(--surface2); border-radius:6px; padding:14px 16px;">
       <div style="font-size:10px;text-transform:uppercase;letter-spacing:0.08em;color:var(--muted);font-weight:600;margin-bottom:8px;">${d.label}</div>
       <div style="font-size:18px;font-weight:700;color:var(--text);">${d.value}</div>
+    </div>
+  `).join('');
+
+  // ---- Na čem potřebuji zapracovat (doporučené nástroje dle plnění) ----
+  const shareSvc = parseFloat(u.shareASRServices) || 0; // podíl, 0.03 = 3 %
+  const fillVal = parseFloat(u.asrHrsFill) || 0;        // podíl, 1.0 = 100 %
+  const L = {
+    coach: 'https://chatgpt.com/g/g-69a47d10742481918080d44399ee6e5a-prodejni-coach-5p',
+    sluzby: 'https://chatgpt.com/g/g-6971e68e98b08191b56f28d53387995f-alza-sluzby-expert',
+    product: 'https://gemini.google.com/gem/1l5mZZDKf2HFcBRQvrIhk4-osehmqSldN?usp=sharing',
+    zaneta: 'https://notebooklm.google.com/notebook/33f161d4-b294-40f3-b5e9-4789b869bc98',
+  };
+  const toolCards = [];
+  if (shareSvc < 0.03) {
+    toolCards.push({
+      text: 'Máš větší potenciál v barvení zakázek službami. Pokud si nevíš rady, může ti pomoci Prodejní coach (Alza5P), nebo přímo Služby Expert.',
+      links: [
+        { label: 'Prodejní coach 5P', url: L.coach },
+        { label: 'Služby Expert', url: L.sluzby },
+      ],
+    });
+  }
+  if (fillVal < 1) {
+    toolCards.push({
+      text: 'Využívání svého času efektivně a kvalita prodejních rozhovorů je hlavní cesta k navýšení asistovaného obratu. Nezapomínej, že každá zakázka by měla být správně cross-sellovaná a upsellovaná. Zároveň je důležité mít dostatečnou míru zbožíznalství a přehled o novinkách. Pomoct ti může Product Research bot a Prodejní coach (Alza5P).',
+      links: [
+        { label: 'Prodejní coach 5P', url: L.coach },
+        { label: 'Product Research', url: L.product },
+      ],
+    });
+  }
+  if (fillVal > 1 && shareSvc > 0.03) {
+    toolCards.push({
+      text: 'Prodejně si vedeš velmi dobře, neznamená to ale, že si můžeme dovolit usnout na vavřínech. Můžeš zatím načerpat znalosti z Žanety, nebo si zkusit nasimulovat prodejní rozhovor v Coachovi.',
+      links: [
+        { label: 'Prodejní coach 5P', url: L.coach },
+        { label: 'Žaneta', url: L.zaneta },
+      ],
+    });
+  }
+  if (toolCards.length === 0) {
+    toolCards.push({
+      text: 'Aktuálně se držíš v rovnováze. Pokud chceš dál růst, mrkni na rozcestník nástrojů pod tlačítkem „Zobrazit více".',
+      links: [{ label: 'Prodejní coach 5P', url: L.coach }],
+    });
+  }
+  document.getElementById('mv-tools').innerHTML = toolCards.map(c => `
+    <div class="mv-tool-card">
+      <div class="mv-tool-text">${c.text}</div>
+      <div class="mv-tool-links">
+        ${c.links.map(l => `<a class="mv-tool-link" href="${l.url}" target="_blank" rel="noopener">${l.label} ↗</a>`).join('')}
+      </div>
     </div>
   `).join('');
 
