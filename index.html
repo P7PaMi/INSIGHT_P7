@@ -2917,18 +2917,33 @@ async function parseWorkbook(wb, filename, rawBytes) {
     return -1;
   }
   // Find the header row in a sheet by scanning ALL columns for a marker text
-  function findHeaderRow(rows, marker, limit) {
+  function findHeaderRow(rows, markers, limit) {
+    const list = Array.isArray(markers) ? markers : [markers];
     const lim = Math.min(rows.length, limit || 10);
     for (let r = 0; r < lim; r++) {
       const row = rows[r];
-      if (row && row.some(c => String(c == null ? '' : c).toLowerCase().includes(marker.toLowerCase()))) return r;
+      if (row && row.some(c => { const v = String(c == null ? '' : c).toLowerCase(); return list.some(m => v.includes(m.toLowerCase())); })) return r;
+    }
+    return -1;
+  }
+  // Resolve a column whose header contains ANY of `anyKw` (and NONE of `not`)
+  function findColAny(rows, anyKw, not) {
+    not = not || [];
+    for (const row of rows) {
+      if (!row) continue;
+      for (let ci = 0; ci < row.length; ci++) {
+        const v = String(row[ci] == null ? '' : row[ci]).toLowerCase();
+        if (anyKw.some(k => v.includes(k.toLowerCase())) && !not.some(n => v.includes(n.toLowerCase()))) return ci;
+      }
     }
     return -1;
   }
   function buildColMap(sheetLabel, headerRows, spec) {
     const map = {};
     for (const [field, def] of Object.entries(spec)) {
-      let idx = def.kw && def.kw.length ? findCol(headerRows, def.kw, def.not) : -1;
+      let idx = -1;
+      if (def.anyKw && def.anyKw.length) idx = findColAny(headerRows, def.anyKw, def.not);
+      else if (def.kw && def.kw.length) idx = findCol(headerRows, def.kw, def.not);
       if (idx < 0) {
         idx = def.fallback;
         if (def.required) warnings.push(`${sheetLabel}: sloupec „${def.label || field}“ nenalezen podle názvu, použit pevný index ${def.fallback}.`);
@@ -2955,19 +2970,19 @@ async function parseWorkbook(wb, filename, rawBytes) {
       asrPlan:         { kw:['asr','plán'],                  fallback:5 },
       revenue:         { kw:['revenue'], not:['share','/hrs','rr','plán','ar '], fallback:7, required:true, label:'Revenue' },
       revenueRR:       { kw:['revenue','rr'],                fallback:8 },
-      attendance:      { kw:['attendance'], not:['plan'],    fallback:9 },
-      finalAsistRev:   { kw:['final','asist','revenue'],     fallback:10 },
-      productAsistRev: { kw:['product','asist','revenue'],   fallback:11 },
-      serviceAsistRev: { kw:['service','asist','revenue'],   fallback:12 },
-      arAll:           { kw:['ar','asist','revenue','all'],  fallback:13 },
-      arService:       { kw:['ar','asist','service'],        fallback:14 },
-      planASRServices: { kw:['plan','asr','services'],       fallback:15 },
-      fillASRService:  { kw:['fill','asr','service'],        fallback:16 },
-      asrHrsTarget:    { kw:[],                              fallback:21 },
-      asrHrs:          { kw:[],                              fallback:22 },
-      asrHrsFill:      { kw:[],                              fallback:23 },
-      arProducts:      { kw:[],                              fallback:26 },
-      arServices:      { kw:[],                              fallback:27 },
+      attendance:      { kw:['attendance'], not:['plan','_log','_pob','log','pob'], fallback:11, required:true, label:'Attendance' },
+      finalAsistRev:   { kw:['final','asist','revenue'],     fallback:12 },
+      productAsistRev: { kw:['product','asist','revenue'],   fallback:13 },
+      serviceAsistRev: { kw:['service','asist','revenue'],   fallback:14 },
+      arAll:           { kw:['ar','asist','revenue','all'],  fallback:15 },
+      arService:       { kw:['ar','asist','service'],        fallback:16 },
+      planASRServices: { kw:['plan','asr','services'],       fallback:17 },
+      fillASRService:  { kw:['fill','asr','service'],        fallback:18 },
+      asrHrsTarget:    { kw:['asr/hrs','target'],            fallback:23 },
+      asrHrs:          { kw:['asr/hrs'], not:['target','fill','services','_services'], fallback:24 },
+      asrHrsFill:      { kw:['asr/hrs','fill'],              fallback:25, required:true, label:'ASR/Hrs Fill' },
+      arProducts:      { kw:['ar(d)','product'],             fallback:28 },
+      arServices:      { kw:['ar(d)','service'],             fallback:29 },
     });
     for (let i = 5; i < bpRaw.length; i++) {
       const row = bpRaw[i];
@@ -3062,25 +3077,25 @@ async function parseWorkbook(wb, filename, rawBytes) {
   const btSheet = wb.Sheets['Branch Performance in Time'];
   if (btSheet) {
     const btRaw = XLSX.utils.sheet_to_json(btSheet, { header: 1, defval: null });
-    // header row contains "Popisky řádků" — scan all columns (SheetJS may drop leading blank col)
-    let hdrR = findHeaderRow(btRaw, 'popisky');
+    // header row contains the pivot row-label header ("Popisky řádků" / "Row Labels") — scan all columns
+    let hdrR = findHeaderRow(btRaw, ['popisky', 'row labels', 'riadk']);
     if (hdrR < 0) hdrR = 2;
     const btHdr = [btRaw[hdrR]];
     const T = buildColMap('Branch Performance in Time', btHdr, {
-      branch:       { kw:['popisky'],                fallback:0, required:true, label:'Popisky řádků' },
-      attendance:   { kw:['attendance'],             fallback:1 },
-      revShare:     { kw:['revenue','share'],        fallback:2 },
-      avgBasket:    { kw:['basket'],                 fallback:3 },
-      revPerHrs:    { kw:['revenue/hrs'],            fallback:4 },
-      revenue:      { kw:['revenue'], not:['share','/hrs','rr'], fallback:5 },
-      revenueRR:    { kw:['revenue','rr'],           fallback:6 },
-      docCount:     { kw:['doc','count'],            fallback:7 },
-      finalAsist:   { kw:['final','asist'],          fallback:8 },
-      svcAsist:     { kw:['service','asist'],        fallback:9 },
-      prodAsist:    { kw:['products','asist'],       fallback:10 },
-      svcCount:     { kw:['services','count'],       fallback:11 },
-      prodCount:    { kw:['products','count'],       fallback:12 },
-      asrHrs:       { kw:['asr/hrs'],                fallback:13 },
+      branch:       { anyKw:['popisky','row labels','riadk'], fallback:0, required:true, label:'Popisky řádků / Row Labels' },
+      attendance:   { kw:['attendance'], not:['log','pob','share'], fallback:3 },
+      revShare:     { kw:['revenue','share'],        fallback:4 },
+      avgBasket:    { kw:['basket'],                 fallback:5 },
+      revPerHrs:    { kw:['revenue/hrs'],            fallback:6 },
+      revenue:      { kw:['revenue'], not:['share','/hrs','rr'], fallback:7 },
+      revenueRR:    { kw:['revenue','rr'],           fallback:8 },
+      docCount:     { kw:['doc','count'],            fallback:9 },
+      finalAsist:   { kw:['final','asist'],          fallback:10 },
+      svcAsist:     { kw:['service','asist'],        fallback:11 },
+      prodAsist:    { kw:['products','asist'],       fallback:12 },
+      svcCount:     { kw:['services','count'],       fallback:13 },
+      prodCount:    { kw:['products','count'],       fallback:14 },
+      asrHrs:       { kw:['asr/hrs'],                fallback:15 },
     });
     for (let i = hdrR + 1; i < btRaw.length; i++) {
       const row = btRaw[i];
@@ -3105,11 +3120,11 @@ async function parseWorkbook(wb, filename, rawBytes) {
   const bqSheet = wb.Sheets['Branch Quality'];
   if (bqSheet) {
     const bqRaw = XLSX.utils.sheet_to_json(bqSheet, { header: 1, defval: null });
-    let hdrR = findHeaderRow(bqRaw, 'popisky');
+    let hdrR = findHeaderRow(bqRaw, ['popisky', 'row labels', 'riadk']);
     if (hdrR < 0) hdrR = 2;
     const bqHdr = [bqRaw[hdrR]];
     const Q = buildColMap('Branch Quality', bqHdr, {
-      branch:      { kw:['popisky'],            fallback:0, required:true, label:'Popisky řádků' },
+      branch:      { anyKw:['popisky','row labels','riadk'], fallback:0, required:true, label:'Popisky řádků / Row Labels' },
       activity:    { kw:['activity','branch'],  fallback:1 },
       npsBranch:   { kw:['nps','branch'],       fallback:2 },
       hdBranch:    { kw:['hd','branch'],        fallback:3 },
@@ -3384,6 +3399,10 @@ function renderBranchDetail() {
     const dim = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
     const dayN = now.getDate();
     const monthProgress = Math.round(dayN / dim * 100);
+    // RR asistovaného obratu — predikce konce měsíce z aktuálního Final Asist Revenue
+    // přepočtená stejným tempem jako Revenue RR (faktor = Revenue RR / Revenue)
+    const rrFactor = (branch.revenue > 0 && rr > 0) ? (rr / branch.revenue) : 0;
+    const asistRR = rrFactor > 0 ? branch.finalAsistRev * rrFactor : 0;
 
     const rrPanel = `
       <div style="background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:18px 20px;">
@@ -3397,6 +3416,8 @@ function renderBranchDetail() {
             <div style="font-size:22px;font-weight:700;color:var(--text);">${fmtFull(plan)}</div></div>
           <div><div style="font-size:10px;text-transform:uppercase;letter-spacing:0.08em;color:var(--muted);font-weight:600;margin-bottom:6px;">Plnění RR</div>
             <div style="font-size:22px;font-weight:700;color:${rrColor};">${plan>0?(rrFill*100).toFixed(1).replace('.',',')+' %':'—'}</div></div>
+          ${asistRR > 0 ? `<div><div style="font-size:10px;text-transform:uppercase;letter-spacing:0.08em;color:var(--muted);font-weight:600;margin-bottom:6px;">Asist. obrat (RR)</div>
+            <div style="font-size:22px;font-weight:700;color:var(--accent);">${fmtFull(asistRR)}</div></div>` : ''}
         </div>
         <div style="background:var(--surface3);border-radius:3px;height:6px;overflow:hidden;margin-bottom:10px;">
           <div style="height:100%;border-radius:3px;width:${Math.min(rrFill*100,100)}%;background:${rrColor};"></div>
@@ -7134,7 +7155,7 @@ function mvExportPNG() {
     <table class="metric-table">
       <thead><tr><th>Panel</th><th>Co ukazuje</th></tr></thead>
       <tbody>
-        <tr><td>Run-rate predikce konce měsíce</td><td>Předpokládaný obrat na konci měsíce (Revenue RR) porovnaný s plánem a procentem jeho plnění, plus doplňkové ukazatele Ø košík, Revenue/hod a počet dokladů. Pokud v datech chybí Revenue RR nebo list <em>Branch Performance in Time</em>, panel se neměří.</td></tr>
+        <tr><td>Run-rate predikce konce měsíce</td><td>Předpokládaný obrat na konci měsíce (Revenue RR) porovnaný s plánem a procentem jeho plnění, k tomu <strong>RR asistovaného obratu</strong> (predikce asistovaného obratu na konci měsíce stejným tempem) a doplňkové ukazatele Ø košík, Revenue/hod a počet dokladů. Pokud v datech chybí Revenue RR nebo list <em>Branch Performance in Time</em>, panel se neměří.</td></tr>
         <tr><td>Kvalita pobočky</td><td>NPS Branch, CCT NPS, počet reklamací, Complaint index, SR medián WT a HD Branch. Hodnoty NPS a CCT NPS jsou barevně odlišené podle dosažené úrovně. Vyžaduje list <em>Branch Quality</em>.</td></tr>
       </tbody>
     </table>
