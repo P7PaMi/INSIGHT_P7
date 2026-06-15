@@ -1547,6 +1547,105 @@
     border-radius: 6px;
     padding: 14px 16px;
   }
+
+  /* ── Můj výkon · koučovací vrstvy ── */
+  .mv-layer-label {
+    font-size: 11px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase;
+    color: var(--text); margin: 4px 0 14px; display: flex; align-items: center; gap: 8px;
+  }
+  .mv-layer-label::before {
+    content: ''; width: 3px; height: 14px; border-radius: 2px; background: var(--accent);
+  }
+  .mv-layer-label span { color: var(--dim); font-weight: 600; letter-spacing: 0.1em; }
+
+  /* Mise dne */
+  .mv-mission-card {
+    position: relative; overflow: hidden;
+    background: linear-gradient(135deg, rgba(122,191,46,0.10), rgba(78,127,184,0.08));
+    border: 1px solid var(--accent); border-radius: 12px; padding: 22px 24px;
+  }
+  .mv-mission-eyebrow {
+    font-size: 10px; font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase;
+    color: var(--accent); margin-bottom: 10px; display: flex; align-items: center; gap: 8px;
+  }
+  .mv-mission-title { font-size: 21px; font-weight: 700; color: var(--text); line-height: 1.25; letter-spacing: -0.01em; margin-bottom: 8px; }
+  .mv-mission-body { font-size: 13px; color: var(--text); line-height: 1.6; max-width: 720px; }
+  .mv-mission-body b { color: var(--accent3); }
+  .mv-mission-actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 18px; }
+  .mv-mission-btn {
+    display: inline-flex; align-items: center; gap: 7px;
+    font-size: 13px; font-weight: 700; text-decoration: none; cursor: pointer;
+    color: #fff; background: var(--accent); border: 1px solid var(--accent);
+    border-radius: 8px; padding: 9px 16px; transition: transform 0.12s, box-shadow 0.15s;
+  }
+  .mv-mission-btn:hover { transform: translateY(-1px); box-shadow: 0 4px 14px rgba(122,191,46,0.3); }
+  .mv-mission-btn.secondary { color: var(--accent); background: transparent; }
+  .mv-mission-btn.secondary:hover { box-shadow: none; background: rgba(122,191,46,0.10); }
+  .mv-mission-metric {
+    position: absolute; top: 18px; right: 24px; text-align: right;
+  }
+  .mv-mission-metric .v { font-size: 26px; font-weight: 800; letter-spacing: -0.03em; line-height: 1; }
+  .mv-mission-metric .l { font-size: 10px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); margin-top: 5px; font-weight: 600; }
+
+  /* Mise – stav splněno */
+  .mv-mission-card.done { background: linear-gradient(135deg, rgba(122,191,46,0.14), rgba(122,191,46,0.05)); }
+
+  /* Readiness gauge */
+  .mv-ready-score { font-size: 46px; font-weight: 800; letter-spacing: -0.04em; line-height: 1; }
+  .mv-ready-sub { font-size: 12px; color: var(--muted); margin-top: 4px; font-weight: 600; }
+  .mv-ready-bar-row { display: flex; align-items: center; gap: 10px; margin-top: 12px; }
+  .mv-ready-bar-row .nm { font-size: 11px; color: var(--muted); width: 92px; flex-shrink: 0; }
+  .mv-ready-bar-track { flex: 1; height: 7px; background: var(--surface3); border-radius: 4px; overflow: hidden; }
+  .mv-ready-bar-fill { height: 100%; border-radius: 4px; transition: width 0.5s; }
+  .mv-ready-bar-val { font-size: 11px; font-weight: 700; width: 34px; text-align: right; flex-shrink: 0; }
+
+  /* Kohorta */
+  .mv-cohort-rank { display: flex; align-items: baseline; gap: 8px; margin-bottom: 4px; }
+  .mv-cohort-rank .big { font-size: 34px; font-weight: 800; letter-spacing: -0.03em; }
+  .mv-cohort-rank .of { font-size: 15px; color: var(--muted); font-weight: 600; }
+  .mv-cohort-pct-track { height: 8px; background: var(--surface3); border-radius: 5px; position: relative; margin: 16px 0 6px; overflow: visible; }
+  .mv-cohort-pct-fill { height: 100%; border-radius: 5px; }
+  .mv-cohort-marker { position: absolute; top: -4px; width: 3px; height: 16px; background: var(--text); border-radius: 2px; }
+  .mv-cohort-row { display: flex; justify-content: space-between; font-size: 12px; padding: 8px 0; border-top: 1px solid var(--border); }
+  .mv-cohort-row .lbl { color: var(--muted); }
+  .mv-cohort-row .val { font-weight: 700; color: var(--text); }
+
+  /* Run-rate */
+  .mv-rr-headline { font-size: 13px; color: var(--text); line-height: 1.55; }
+  .mv-rr-headline b { font-weight: 800; }
+  .mv-rr-track { height: 26px; background: var(--surface3); border-radius: 6px; position: relative; overflow: hidden; margin: 16px 0 8px; }
+  .mv-rr-actual { position: absolute; left: 0; top: 0; height: 100%; border-radius: 6px; }
+  .mv-rr-proj { position: absolute; top: 0; height: 100%; opacity: 0.4; border-radius: 0 6px 6px 0; }
+  .mv-rr-target-line { position: absolute; top: -3px; width: 2px; height: 32px; background: var(--text); }
+  .mv-rr-legend { display: flex; gap: 16px; font-size: 10px; color: var(--muted); flex-wrap: wrap; }
+  .mv-rr-legend span { display: inline-flex; align-items: center; gap: 5px; }
+  .mv-rr-legend i { width: 10px; height: 10px; border-radius: 2px; display: inline-block; }
+  .mv-alarm {
+    display: flex; gap: 10px; align-items: flex-start; margin-top: 14px;
+    background: rgba(224,85,96,0.10); border: 1px solid var(--red); border-radius: 8px; padding: 11px 14px;
+  }
+  .mv-alarm.ok { background: rgba(122,191,46,0.10); border-color: var(--green); }
+  .mv-alarm-txt { font-size: 12px; line-height: 1.5; color: var(--text); }
+
+  /* Data modal měsíční řádky */
+  .mv-month-row {
+    display: flex; align-items: center; gap: 12px;
+    background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 10px 14px;
+  }
+  .mv-month-row .mn { font-size: 13px; font-weight: 700; color: var(--text); width: 92px; flex-shrink: 0; }
+  .mv-month-row .st { font-size: 11px; color: var(--muted); flex: 1; }
+  .mv-month-row.filled { border-color: var(--accent); }
+  .mv-month-row.filled .st { color: var(--accent); font-weight: 600; }
+  .mv-file-btn {
+    font-size: 11px; font-weight: 600; color: var(--accent2); background: transparent;
+    border: 1px solid var(--border); border-radius: 6px; padding: 6px 12px; cursor: pointer;
+    transition: all 0.15s; white-space: nowrap;
+  }
+  .mv-file-btn:hover { border-color: var(--accent2); }
+  .mv-month-clear {
+    font-size: 14px; color: var(--dim); background: transparent; border: none; cursor: pointer; padding: 2px 6px;
+  }
+  .mv-month-clear:hover { color: var(--red); }
   .mv-tool-card .mv-tool-text { font-size: 13px; color: var(--text); line-height: 1.55; margin-bottom: 10px; }
   .mv-tool-links { display: flex; flex-wrap: wrap; gap: 8px; }
   .mv-tool-link {
@@ -1996,10 +2095,16 @@
   <!-- ===== MŮJ VÝKON ===== -->
   <div id="view-mujvykon" style="display:none; padding:28px 28px 40px; width:100%; box-sizing:border-box; overflow-y:auto; height:100%;">
     <div class="view-header" style="padding-bottom:16px;border-bottom:1px solid var(--border);margin-bottom:20px;display:flex;align-items:center;flex-wrap:wrap;gap:10px;">
-      <div class="view-title">Můj výkon</div>
-      <div class="filter-group" style="margin-left:auto; gap:8px;">
+      <div>
+        <div class="view-title" style="margin-bottom:2px;">Můj výkon</div>
+        <div id="mv-greeting" style="font-size:12px;color:var(--muted);"></div>
+      </div>
+      <div class="filter-group" style="margin-left:auto; gap:8px; flex-wrap:wrap;">
+        <span class="filter-label">Pobočka:</span>
+        <select id="mv-branch-select" onchange="mvSetBranch()" style="min-width:160px;"></select>
         <span class="filter-label">Zaměstnanec:</span>
         <select id="mv-person-select" onchange="mvRender()" style="min-width:180px;"></select>
+        <button class="btn" onclick="mvOpenDataModal()" title="Přidat historická měsíční hlášení" style="display:flex;align-items:center;gap:5px;">＋ Dodat data</button>
         <button class="btn" onclick="mvExportPNG()" title="Exportovat jako PNG">⬇ Export PNG</button>
       </div>
     </div>
@@ -2009,8 +2114,48 @@
     </div>
 
     <div id="mv-body" style="display:none;">
+
+      <!-- ═══ VRSTVA 3: MISE DNE (co dnes udělám) ═══ -->
+      <div id="mv-mission" style="margin-bottom:24px;"></div>
+
+      <!-- ═══ VRSTVA 2: PREDIKCE — Readiness + Run-rate (kam směřuju) ═══ -->
+      <div style="display:grid; grid-template-columns:minmax(260px,1fr) minmax(260px,1.4fr); gap:20px; margin-bottom:24px;" id="mv-predict-wrap">
+        <div id="mv-readiness" style="background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:22px;"></div>
+        <div id="mv-runrate" style="background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:22px;"></div>
+      </div>
+
+      <!-- ═══ VRSTVA 1: DIAGNÓZA (kde stojím) ═══ -->
+      <div class="mv-layer-label">Kde stojím <span>· Diagnóza</span></div>
+
       <!-- KPI Strip -->
       <div id="mv-kpi-strip" style="display:grid; grid-template-columns:repeat(auto-fit,minmax(120px,1fr)); gap:1px; background:var(--border); border:1px solid var(--border); border-radius:var(--radius); overflow:hidden; margin-bottom:24px;"></div>
+
+      <!-- Trend mého mediánu + Kohorta vedle sebe -->
+      <div style="display:grid; grid-template-columns:1.5fr 1fr; gap:24px; margin-bottom:24px;" id="mv-trend-cohort-wrap">
+        <div style="background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:20px 22px;">
+          <div style="display:flex; align-items:flex-start; justify-content:space-between; gap:12px; margin-bottom:6px;">
+            <div class="section-title">Můj trend v čase</div>
+            <div id="mv-trend-verdict"></div>
+          </div>
+          <div style="font-size:11px; color:var(--dim); margin-bottom:14px;">ASR/Hrs Fill napříč měsíci — z nahraných historických hlášení.</div>
+          <div id="mv-trend-chart-wrap" style="position:relative; height:200px;">
+            <canvas id="mv-trend-chart"></canvas>
+          </div>
+          <div id="mv-trend-empty" style="display:none; padding:28px 8px; text-align:center;">
+            <div style="font-size:13px; color:var(--muted); line-height:1.6;">
+              Zatím nemám tvoje historická data, takže neumím spočítat trend.<br>
+              Klikni na <strong style="color:var(--accent)">＋ Dodat data</strong> nahoře a přidej hlášení za předchozí měsíce.
+            </div>
+            <button class="btn" onclick="mvOpenDataModal()" style="margin-top:14px; font-weight:600;">＋ Dodat data</button>
+          </div>
+        </div>
+
+        <div style="background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:20px 22px;">
+          <div class="section-title" style="margin-bottom:6px;">Kohorta</div>
+          <div style="font-size:11px; color:var(--dim); margin-bottom:16px;">Kde jsem vůči týmu a TOP výkonu.</div>
+          <div id="mv-cohort"></div>
+        </div>
+      </div>
 
       <!-- Zbývající obrat -->
       <div style="background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:20px 22px; margin-bottom:24px;">
@@ -2038,6 +2183,9 @@
         </div>
       </div>
 
+      <!-- ═══ VRSTVA 3 detail: Co s tím (akční vrstva) ═══ -->
+      <div class="mv-layer-label">Co s tím <span>· Akce</span></div>
+
       <!-- Cesty k navýšení výkonu (kvantifikované) -->
       <div style="background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:20px 22px; margin-bottom:24px;">
         <div class="section-title" style="margin-bottom:6px;">Cesty k navýšení výkonu</div>
@@ -2056,8 +2204,33 @@
 
       <!-- Porovnání s kolegy -->
       <div data-mv-comparison-section style="background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:20px 22px; margin-bottom:24px;">
-        <div class="section-title" style="margin-bottom:16px;">Porovnání s Praha – Centrála (ASR/Hrs Fill)</div>
+        <div class="section-title" style="margin-bottom:16px;">Porovnání s pobočkou <span id="mv-comparison-branch">Praha – centrála</span> (ASR/Hrs Fill)</div>
         <div id="mv-comparison"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ MODAL: Dodat historická data ═══ -->
+  <div id="mv-data-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.65);z-index:500;align-items:center;justify-content:center;backdrop-filter:blur(6px);padding:24px;" onclick="if(event.target===this)mvCloseDataModal()">
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;width:100%;max-width:680px;max-height:88vh;display:flex;flex-direction:column;overflow:hidden;font-family:Helvetica,Arial,sans-serif;">
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;padding:20px 26px;border-bottom:1px solid var(--border);">
+        <div>
+          <div style="font-size:17px;font-weight:700;color:var(--text);">Dodat historická data</div>
+          <div style="font-size:12px;color:var(--muted);margin-top:4px;max-width:520px;line-height:1.5;">Ke každému měsíci nahraj příslušné <strong>Denní hlášení (.xlsx)</strong>. Z jednoho souboru se uloží data <strong>všech zaměstnanců</strong> za daný měsíc — stačí tedy nahrát každý měsíc jen jednou, ne pro každého zvlášť. Data zůstávají jen v tomto prohlížeči.</div>
+        </div>
+        <button onclick="mvCloseDataModal()" style="background:transparent;border:1px solid var(--border);color:var(--muted);border-radius:6px;padding:5px 11px;cursor:pointer;font-size:12px;font-family:Helvetica,Arial,sans-serif;font-weight:600;flex-shrink:0;" onmouseover="this.style.borderColor='var(--muted)'" onmouseout="this.style.borderColor='var(--border)'">✕ Zavřít</button>
+      </div>
+      <div style="padding:18px 26px;overflow-y:auto;">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:16px;flex-wrap:wrap;">
+          <span class="filter-label">Náhled osoby:</span>
+          <select id="mv-data-person" style="min-width:200px;"></select>
+          <span style="font-size:11px;color:var(--dim);margin-left:auto;">Měsíce od ledna do aktuálního</span>
+        </div>
+        <div id="mv-data-months" style="display:flex;flex-direction:column;gap:8px;"></div>
+        <div style="margin-top:18px;display:flex;gap:10px;flex-wrap:wrap;align-items:center;">
+          <button class="btn" onclick="mvClearHistory()" style="color:var(--red);border-color:var(--red);">Vymazat veškerou historii</button>
+          <div style="margin-left:auto;font-size:11px;color:var(--dim);align-self:center;" id="mv-data-status"></div>
+        </div>
       </div>
     </div>
   </div>
@@ -6360,6 +6533,35 @@ function dtInit() {
 
 // ===== MŮJ VÝKON =====
 let mvShiftLen = 8;
+let mvBranch = 'Praha - centrála';   // aktuálně vybraná pobočka
+
+/* ════════════════════════════════════════════════════════════════════
+   MŮJ VÝKON — koučovací engine
+   Vrstvy dle zadání:  Kde stojím (diagnóza) → Kam směřuju (predikce)
+   → Co dnes udělám (mise dne, uzavřená do smyčky).
+   ════════════════════════════════════════════════════════════════════ */
+
+const MV_MONTHS_CZ = ['Leden','Únor','Březen','Duben','Květen','Červen','Červenec','Srpen','Září','Říjen','Listopad','Prosinec'];
+const MV_HISTORY_KEY = 'insight_mv_history_v2';   // { "Jméno": { "2026-01": {fill, share, nps, rev, att, branch, cohortMedian, cohortTop20}, ... } }
+const MV_MISSION_KEY = 'insight_mv_missions_v1';  // { "Jméno": { "2026-06-15": {missionId, done:true} } }
+
+/* ── localStorage helpers (bezpečné, fail-soft) ── */
+function mvLoadHistory() {
+  try { return JSON.parse(localStorage.getItem(MV_HISTORY_KEY)) || {}; } catch { return {}; }
+}
+function mvSaveHistory(h) {
+  try { localStorage.setItem(MV_HISTORY_KEY, JSON.stringify(h)); } catch {}
+}
+function mvLoadMissions() {
+  try { return JSON.parse(localStorage.getItem(MV_MISSION_KEY)) || {}; } catch { return {}; }
+}
+function mvSaveMissions(m) {
+  try { localStorage.setItem(MV_MISSION_KEY, JSON.stringify(m)); } catch {}
+}
+function mvTodayKey() {
+  const d = new Date();
+  return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+}
 
 function mvSetShift(len) {
   mvShiftLen = len;
@@ -6383,12 +6585,10 @@ function mvGetDochazkaEmployee(personName) {
   if (parts.length < 2) return null;
   const docName = parts.slice(1).join(' ') + ' ' + parts[0]; // "Jméno Příjmení"
 
-  // Get current month sheet
-  const MONTHS_CZ = ['Leden','Únor','Březen','Duben','Květen','Červen','Červenec','Srpen','Září','Říjen','Listopad','Prosinec'];
   const now = new Date();
-  const curMonth = MONTHS_CZ[now.getMonth()];
+  const curMonth = MV_MONTHS_CZ[now.getMonth()];
   const sheets = DATA.dochazka.SheetNames.filter(s =>
-    MONTHS_CZ.some(m => s.startsWith(m)) && !s.endsWith('25') &&
+    MV_MONTHS_CZ.some(m => s.startsWith(m)) && !s.endsWith('25') &&
     !['List1','test 31.1.','Dovolené'].includes(s)
   );
   const sheetName = sheets.find(s => s === curMonth || s.startsWith(curMonth)) || sheets[sheets.length - 1];
@@ -6419,26 +6619,137 @@ function mvInit() {
   if (!hasHlaseni || !hasDochazka) {
     warn.style.display = 'block';
     body.style.display = 'none';
-    // Still populate select if possible
-    if (hasHlaseni) mvPopulateSelect();
+    if (hasHlaseni) { mvPopulateBranchSelect(); mvPopulateSelect(); }
     return;
   }
   warn.style.display = 'none';
   body.style.display = 'block';
+  mvPopulateBranchSelect();
   mvPopulateSelect();
+  mvCaptureCurrentMonth();   // automaticky ulož aktuální měsíc do historie z denního hlášení (všechny pobočky)
   mvSetShift(mvShiftLen);
+}
+
+/* ── Naplň výběr poboček (všechny pobočky z dat) ── */
+function mvPopulateBranchSelect() {
+  const sel = document.getElementById('mv-branch-select');
+  if (!sel) return;
+  const branches = [...new Set((DATA.userPerf || [])
+    .filter(u => u.branch && u.attendance > 0)
+    .map(u => u.branch))]
+    .sort((a, b) => a.localeCompare(b, 'cs'));
+  if (branches.length === 0) { sel.innerHTML = ''; return; }
+  // výchozí: Praha - centrála, pokud existuje, jinak první
+  if (!branches.includes(mvBranch)) mvBranch = branches.includes('Praha - centrála') ? 'Praha - centrála' : branches[0];
+  sel.innerHTML = branches.map(b => `<option value="${b.replace(/"/g,'&quot;')}">${b}</option>`).join('');
+  sel.value = mvBranch;
+}
+
+/* ── Přepnutí pobočky → překresli seznam lidí a render ── */
+function mvSetBranch() {
+  const sel = document.getElementById('mv-branch-select');
+  if (sel) mvBranch = sel.value;
+  mvPopulateSelect();
+  mvRender();
 }
 
 function mvPopulateSelect() {
   const sel = document.getElementById('mv-person-select');
   const users = (DATA.userPerf || [])
-    .filter(u => u.branch === 'Praha - centrála' && u.attendance > 0)
+    .filter(u => u.branch === mvBranch && u.attendance > 0)
     .sort((a, b) => a.name.localeCompare(b.name, 'cs'));
   const prev = sel.value;
   sel.innerHTML = users.map(u => `<option value="${u.name.replace(/"/g,'&quot;')}">${u.name}</option>`).join('');
   if (prev && users.find(u => u.name === prev)) sel.value = prev;
-  mvRender();
 }
+
+/* ── Kohorta: medián a TOP-20 průměr ASR/Hrs Fill na pobočce ── */
+function mvCohortStats(branch) {
+  const pool = (DATA.userPerf || [])
+    .filter(x => x.branch === branch && x.attendance > 0 && (parseFloat(x.asrHrsFill) || 0) > 0)
+    .map(x => parseFloat(x.asrHrsFill) || 0)
+    .sort((a, b) => b - a);
+  if (pool.length === 0) return { median: 0, top20: 0, count: 0, sorted: [] };
+  const mid = Math.floor(pool.length / 2);
+  const median = pool.length % 2 ? pool[mid] : (pool[mid - 1] + pool[mid]) / 2;
+  const top20n = Math.max(1, Math.round(pool.length * 0.2));
+  const top20 = pool.slice(0, top20n).reduce((s, v) => s + v, 0) / top20n;
+  return { median, top20, count: pool.length, sorted: pool };
+}
+
+/* ── Spočítej kohortu (medián/top20) zvlášť pro každou pobočku z pole řádků ── */
+function mvCohortByBranch(rows) {
+  // rows: [{branch, fill, att}]; vrací { branch: {median, top20} }
+  const byBranch = {};
+  rows.forEach(r => {
+    if (!r.branch || !(r.att > 0) || !(r.fill > 0)) return;
+    (byBranch[r.branch] = byBranch[r.branch] || []).push(r.fill);
+  });
+  const out = {};
+  Object.keys(byBranch).forEach(b => {
+    const pool = byBranch[b].sort((a, c) => c - a);
+    const mid = Math.floor(pool.length / 2);
+    const median = pool.length % 2 ? pool[mid] : (pool[mid - 1] + pool[mid]) / 2;
+    const t = Math.max(1, Math.round(pool.length * 0.2));
+    out[b] = { median, top20: pool.slice(0, t).reduce((s, v) => s + v, 0) / t };
+  });
+  return out;
+}
+
+/* ── Při vstupu ulož aktuální měsíc z denního hlášení do historie (VŠECHNY pobočky) ── */
+function mvCaptureCurrentMonth() {
+  if (!DATA.userPerf || !DATA.userPerf.length) return;
+  const hist = mvLoadHistory();
+  const now = new Date();
+  const ym = now.getFullYear() + '-' + String(now.getMonth()+1).padStart(2,'0');
+
+  const rows = (DATA.userPerf || [])
+    .filter(u => u.branch && u.attendance > 0)
+    .map(u => ({ branch: u.branch, fill: parseFloat(u.asrHrsFill) || 0, att: parseFloat(u.attendance) || 0 }));
+  const cohorts = mvCohortByBranch(rows);
+
+  (DATA.userPerf || [])
+    .filter(u => u.branch && u.attendance > 0)
+    .forEach(u => {
+      if (!hist[u.name]) hist[u.name] = {};
+      const c = cohorts[u.branch] || { median: 0, top20: 0 };
+      hist[u.name][ym] = {
+        fill: parseFloat(u.asrHrsFill) || 0,
+        share: parseFloat(u.shareASRServices) || 0,
+        nps: parseFloat(u.cctNps) || 0,
+        rev: (parseFloat(u.asistRevProducts) || 0) + (parseFloat(u.asistRevServices) || 0),
+        att: parseFloat(u.attendance) || 0,
+        branch: u.branch,
+        cohortMedian: c.median,
+        cohortTop20: c.top20,
+        live: true,    // pochází z aktuálně nahraného hlášení
+      };
+    });
+  mvSaveHistory(hist);
+}
+
+/* ── Lineární regrese pro směr trendu ── */
+function mvTrendDirection(points) {
+  // points: [{x: index, y: value}], vrací {slope, dir, label, color}
+  const n = points.length;
+  if (n < 2) return { slope: 0, dir: 'flat', label: 'Málo dat', color: 'var(--muted)' };
+  const sx = points.reduce((s, p) => s + p.x, 0);
+  const sy = points.reduce((s, p) => s + p.y, 0);
+  const sxy = points.reduce((s, p) => s + p.x * p.y, 0);
+  const sxx = points.reduce((s, p) => s + p.x * p.x, 0);
+  const denom = n * sxx - sx * sx;
+  const slope = denom === 0 ? 0 : (n * sxy - sx * sy) / denom;
+  // slope je změna fill na měsíc; práh ±0.5 p.b. / měsíc
+  const perMonthPP = slope * 100;
+  if (perMonthPP > 0.5) return { slope, dir: 'up', label: `Rosteš · +${perMonthPP.toFixed(1).replace('.',',')} p.b./měs`, color: 'var(--green)' };
+  if (perMonthPP < -0.5) return { slope, dir: 'down', label: `Klesáš · ${perMonthPP.toFixed(1).replace('.',',')} p.b./měs`, color: 'var(--red)' };
+  return { slope, dir: 'flat', label: 'Stabilní výkon', color: 'var(--yellow)' };
+}
+
+/* ════════════════════════════════════════════════════════════════════
+   HLAVNÍ RENDER
+   ════════════════════════════════════════════════════════════════════ */
+let mvTrendChartInstance = null;
 
 function mvRender() {
   if (!DATA.userPerf || DATA.userPerf.length === 0) return;
@@ -6446,8 +6757,17 @@ function mvRender() {
   const personName = sel.value;
   if (!personName) return;
 
-  const u = DATA.userPerf.find(x => x.name === personName && x.branch === 'Praha - centrála');
+  const u = DATA.userPerf.find(x => x.name === personName && x.branch === mvBranch);
   if (!u) return;
+
+  // greeting
+  const greetEl = document.getElementById('mv-greeting');
+  if (greetEl) {
+    const h = new Date().getHours();
+    const part = h < 10 ? 'Dobré ráno' : h < 18 ? 'Dobrý den' : 'Dobrý večer';
+    const first = personName.split(/\s+/).slice(1).join(' ') || personName;
+    greetEl.textContent = `${part}, ${first}. Tady je, jak na tom dnes jsi a co s tím.`;
+  }
 
   // --- Dochazka data ---
   const docEmp = DATA.dochazka ? mvGetDochazkaEmployee(personName) : null;
@@ -6462,23 +6782,18 @@ function mvRender() {
   // --- Current revenue ---
   const curZeleze = parseFloat(u.asistRevProducts) || 0;
   const curSluzby = parseFloat(u.asistRevServices) || 0;
-  const curRev = curZeleze + curSluzby; // aktuální asistovaný obrat (železo + služby)
+  const curRev = curZeleze + curSluzby;
 
   // --- Revenue split ---
-  // Special rules: Dominik Blažek a Milan Surduk = 60% služby, 40% železo
   const specialPeople = ['dominik blažek', 'milan surduk'];
   const isSpecial = specialPeople.some(n => personName.toLowerCase().includes(n));
   const pctSluzby = isSpecial ? 0.60 : 0.03;
   const pctZelezo = isSpecial ? 0.40 : 0.97;
 
   // --- Missing turnover ---
-  // Chybí k dosavadnímu cíli (se znaménkem): aktuální obrat − ASR TGT × odprac. hodiny
-  // kladná hodnota = uživatel přeplňuje, záporná = neplní
   const chybejiciAktualniObrat = curRev - (asrTgt * attendance);
-  // Chybí do konce měsíce = (plán hodin × ASR TGT) − aktuální asistovaný obrat
   const chybejiciCelkem = (planH * asrTgt) - curRev;
   const chybejiciCelkemPos = Math.max(chybejiciCelkem, 0);
-
   const chybejiciZelezo = chybejiciCelkemPos * pctZelezo;
   const chybejiciSluzby = chybejiciCelkemPos * pctSluzby;
 
@@ -6488,16 +6803,12 @@ function mvRender() {
   if (fill < 0.75) nasobic = 0;
   else if (fill >= 1.20) nasobic = 1.2;
   else nasobic = fill;
-
   const curProv = (curZeleze * 0.0068 + curSluzby * 0.075) * nasobic;
 
-  // Ztráta provize — počítá se POUZE vůči obratu chybějícímu k DOSAVADNÍMU cíli (ne ke konci měsíce)
   const missingToTarget = Math.max((asrTgt * attendance) - curRev, 0);
   const missZelezo = missingToTarget * pctZelezo;
   const missSluzby = missingToTarget * pctSluzby;
-  // při dosažení dosavadního cíle je plnění = 100 % → násobič 1.0
-  const targetNasobic = 1.0;
-  const targetProv = ((curZeleze + missZelezo) * 0.0068 + (curSluzby + missSluzby) * 0.075) * targetNasobic;
+  const targetProv = ((curZeleze + missZelezo) * 0.0068 + (curSluzby + missSluzby) * 0.075) * 1.0;
   const ztrataProv = Math.max(targetProv - curProv, 0);
 
   // --- Daily target ---
@@ -6506,9 +6817,10 @@ function mvRender() {
   const denCilZelezo = denCil * pctZelezo;
   const denCilSluzby = denCil * pctSluzby;
 
-  // --- Comparison with colleagues ---
+  // --- Cohort ---
+  const cohort = mvCohortStats(mvBranch);
   const colleagues = (DATA.userPerf || [])
-    .filter(x => x.branch === 'Praha - centrála' && x.attendance > 0 && (parseFloat(x.asrHrsFill) || 0) > 0)
+    .filter(x => x.branch === mvBranch && x.attendance > 0 && (parseFloat(x.asrHrsFill) || 0) > 0)
     .map(x => ({ name: x.name, fill: parseFloat(x.asrHrsFill) || 0 }))
     .sort((a, b) => b.fill - a.fill);
 
@@ -6526,7 +6838,216 @@ function mvRender() {
   const fmtN2 = v => (parseFloat(v) || 0).toFixed(1).replace('.', ',');
   const fmtPct = v => ((parseFloat(v) || 0) * 100).toFixed(1).replace('.', ',') + ' %';
 
-  // ---- Render KPI strip ----
+  const shareSvc = parseFloat(u.shareASRServices) || 0;
+  const branchUsers = (DATA.userPerf || []).filter(x => x.branch === u.branch && x.attendance > 0);
+  const branchAvgShare = branchUsers.length
+    ? branchUsers.reduce((s, x) => s + (parseFloat(x.shareASRServices) || 0), 0) / branchUsers.length : 0;
+  const npsVal = parseFloat(u.cctNps) || 0;
+  const retImpact = returnsCommissionImpact(personName, myFill || 0);
+
+  /* ══════════════════════════════════════════════════════════
+     VRSTVA 2: READINESS SKÓRE (kompozit jako Oura)
+     ────────────────────────────────────────────────────────── */
+  // 4 složky, každá 0–100:
+  //  Plnění (fill vs 100 %), Služby (share vs 3 %), Kvalita (NPS vs 5), Vratky (čím méně, tím lépe)
+  const sFill   = Math.max(0, Math.min(100, (myFill / 1.0) * 100));
+  const sShare  = Math.max(0, Math.min(100, (shareSvc / 0.03) * 100));
+  const sNps    = npsVal > 0 ? Math.max(0, Math.min(100, (npsVal / 5) * 100)) : 70; // bez NPS neutrální
+  const retRatio = curRev > 0 ? (retImpact.prod + retImpact.svc) / curRev : 0;
+  const sRet    = Math.max(0, Math.min(100, 100 - retRatio * 400)); // 25 % vratek → 0 bodů
+  const readiness = Math.round(sFill * 0.45 + sShare * 0.25 + sNps * 0.15 + sRet * 0.15);
+
+  let rdColor, rdLabel;
+  if (readiness >= 80)      { rdColor = 'var(--green)';  rdLabel = 'Připraven dominovat'; }
+  else if (readiness >= 60) { rdColor = 'var(--accent3)';rdLabel = 'Solidní forma'; }
+  else if (readiness >= 40) { rdColor = 'var(--yellow)'; rdLabel = 'Je co dohánět'; }
+  else                      { rdColor = 'var(--red)';    rdLabel = 'Potřebuješ zabrat'; }
+
+  const rdComponents = [
+    { nm: 'Plnění',  v: sFill,  c: sFill >= 80 ? 'var(--green)' : sFill >= 50 ? 'var(--yellow)' : 'var(--red)' },
+    { nm: 'Služby',  v: sShare, c: sShare >= 80 ? 'var(--green)' : sShare >= 50 ? 'var(--yellow)' : 'var(--red)' },
+    { nm: 'Kvalita', v: sNps,   c: sNps >= 80 ? 'var(--green)' : sNps >= 50 ? 'var(--yellow)' : 'var(--red)' },
+    { nm: 'Vratky',  v: sRet,   c: sRet >= 80 ? 'var(--green)' : sRet >= 50 ? 'var(--yellow)' : 'var(--red)' },
+  ];
+
+  document.getElementById('mv-readiness').innerHTML = `
+    <div class="section-title" style="margin-bottom:4px;">Readiness skóre</div>
+    <div style="font-size:11px;color:var(--dim);margin-bottom:16px;">Kompozit připravenosti — plnění, služby, kvalita, vratky.</div>
+    <div style="display:flex;align-items:flex-end;gap:14px;">
+      <div class="mv-ready-score" style="color:${rdColor}">${readiness}<span style="font-size:18px;color:var(--muted);font-weight:600;">/100</span></div>
+      <div class="mv-ready-sub" style="color:${rdColor}">${rdLabel}</div>
+    </div>
+    <div style="margin-top:18px;">
+      ${rdComponents.map(c => `
+        <div class="mv-ready-bar-row">
+          <div class="nm">${c.nm}</div>
+          <div class="mv-ready-bar-track"><div class="mv-ready-bar-fill" style="width:${c.v}%;background:${c.c};"></div></div>
+          <div class="mv-ready-bar-val" style="color:${c.c}">${Math.round(c.v)}</div>
+        </div>`).join('')}
+    </div>`;
+
+  /* ══════════════════════════════════════════════════════════
+     VRSTVA 2: RUN-RATE PREDIKCE + retenční alarm
+     ────────────────────────────────────────────────────────── */
+  // Projekce konce měsíce: aktuální obrat × (plán hodin / odpracované)
+  const projRev = attendance > 0 ? curRev * (planH / attendance) : curRev;
+  const monthTarget = planH * asrTgt;
+  const projFillPct = monthTarget > 0 ? (projRev / monthTarget) : 0;
+  const actualPctOfTarget = monthTarget > 0 ? Math.min(curRev / monthTarget, 1) : 0;
+  const projPctOfTarget = monthTarget > 0 ? Math.min(projRev / monthTarget, 1.3) : 0;
+
+  let rrColor = projFillPct >= 1 ? 'var(--green)' : projFillPct >= 0.85 ? 'var(--yellow)' : 'var(--red)';
+  let rrVerdict = projFillPct >= 1
+    ? `Tímto tempem skončíš měsíc na <b style="color:var(--green)">${fmtPct(projFillPct)}</b> plnění — nad cílem.`
+    : `Tímto tempem skončíš měsíc na <b style="color:${rrColor}">${fmtPct(projFillPct)}</b> plnění. K cíli ti bude chybět <b>${fmt(Math.max(monthTarget - projRev,0))}</b>.`;
+
+  // Stability / retenční alarm: kombinace nízkého plnění + záporného trendu
+  const histPersonForStab = mvLoadHistory()[personName] || {};
+  const stabKeys = Object.keys(histPersonForStab).sort();
+  let stabilityPct = readiness; // pokud nemáme historii, použij readiness jako proxy
+  let stabilityNote = '';
+  if (stabKeys.length >= 2) {
+    const recent = stabKeys.slice(-3).map(k => (histPersonForStab[k].fill || 0));
+    const trendPts = recent.map((y, i) => ({ x: i, y }));
+    const td = mvTrendDirection(trendPts);
+    const lastFill = recent[recent.length - 1];
+    stabilityPct = Math.round(Math.max(0, Math.min(100, lastFill * 70 + (td.dir === 'up' ? 30 : td.dir === 'flat' ? 15 : 0))));
+    stabilityNote = td.dir === 'down' ? ' Tvůj trend navíc klesá.' : '';
+  }
+
+  let alarmHtml;
+  if (stabilityPct < 60) {
+    alarmHtml = `<div class="mv-alarm">
+      <div style="font-size:18px;">⚠️</div>
+      <div class="mv-alarm-txt"><b>Stability ${stabilityPct} %</b> — pod prahem 60 %. Riziko poklesu výkonu / odchodu.${stabilityNote} Doporučení: zarezervovat 1:1 s TL a zaměřit mise dne na rychlé výhry.</div>
+    </div>`;
+  } else {
+    alarmHtml = `<div class="mv-alarm ok">
+      <div style="font-size:18px;">✓</div>
+      <div class="mv-alarm-txt"><b>Stability ${stabilityPct} %</b> — stabilní zóna. Drž tempo a pracuj na slabší složce readiness.</div>
+    </div>`;
+  }
+
+  document.getElementById('mv-runrate').innerHTML = `
+    <div class="section-title" style="margin-bottom:4px;">Run-rate predikce</div>
+    <div style="font-size:11px;color:var(--dim);margin-bottom:16px;">Odhad konce měsíce z aktuálního tempa (${fmtN2(attendance)} z ${fmtN2(planH)} h).</div>
+    <div class="mv-rr-headline">${rrVerdict}</div>
+    <div class="mv-rr-track">
+      <div class="mv-rr-proj" style="left:${actualPctOfTarget*100}%;width:${Math.max(projPctOfTarget-actualPctOfTarget,0)*100}%;background:${rrColor};"></div>
+      <div class="mv-rr-actual" style="width:${actualPctOfTarget*100}%;background:${rrColor};"></div>
+      <div class="mv-rr-target-line" style="left:calc(100% / 1.3 * 1 - 1px);"></div>
+    </div>
+    <div class="mv-rr-legend">
+      <span><i style="background:${rrColor}"></i> Aktuální obrat (${fmt(curRev)})</span>
+      <span><i style="background:${rrColor};opacity:0.4"></i> Projekce (${fmt(projRev)})</span>
+      <span><i style="background:var(--text)"></i> Cíl (${fmt(monthTarget)})</span>
+    </div>
+    ${alarmHtml}`;
+
+  /* ══════════════════════════════════════════════════════════
+     VRSTVA 3: MISE DNE — vyber 1 nejdůležitější akci
+     ────────────────────────────────────────────────────────── */
+  const L = {
+    coach: 'https://chatgpt.com/g/g-69a47d10742481918080d44399ee6e5a-prodejni-coach-5p',
+    sluzby: 'https://chatgpt.com/g/g-6971e68e98b08191b56f28d53387995f-alza-sluzby-expert',
+    product: 'https://gemini.google.com/gem/1l5mZZDKf2HFcBRQvrIhk4-osehmqSldN?usp=sharing',
+    zaneta: 'https://notebooklm.google.com/notebook/33f161d4-b294-40f3-b5e9-4789b869bc98',
+  };
+
+  // Kandidátské mise — vybere se ta s nejvyšší prioritou (největší rezerva)
+  const missionCandidates = [];
+
+  // A) Pod 75 % → nulová provize, nejvyšší priorita
+  if (myFill < 0.75 && asrTgt > 0 && attendance > 0) {
+    const need = Math.max(asrTgt * attendance * 0.75 - curRev, 0);
+    missionCandidates.push({
+      id: 'unlock75', prio: 100, metric: fmtPct(myFill), metricLabel: 'aktuální plnění', metricColor: 'var(--red)',
+      title: 'Dnešní mise: dostat se nad 75 % plnění',
+      body: `Pod 75 % plnění je tvůj násobič <b>0</b> — z prodeje teď nemáš žádnou provizi. Chybí ti zhruba <b>${fmt(need)}</b> asistovaného obratu k odemčení provize. Před směnou si zatrénuj otevření a zjišťování potřeb, ať z každého rozhovoru vytěžíš maximum.`,
+      cta: { label: 'Trénink s Coachem 5P', url: L.coach }, cta2: { label: 'Product Research', url: L.product },
+    });
+  }
+  // B) Share služeb pod průměrem → barvení službami
+  if (branchAvgShare > 0 && shareSvc < branchAvgShare * 0.95 && curRev > 0) {
+    const targetSvc = curRev * branchAvgShare;
+    const extraSvc = Math.max(targetSvc - curSluzby, 0);
+    const extraProv = extraSvc * 0.075 * commissionMultiplier(myFill || 1);
+    missionCandidates.push({
+      id: 'services', prio: 80, metric: fmtPct(shareSvc), metricLabel: 'podíl služeb', metricColor: 'var(--yellow)',
+      title: 'Dnešní mise: barvit zakázky službami',
+      body: `Tvůj podíl služeb (<b>${(shareSvc*100).toFixed(1).replace('.',',')} %</b>) je pod průměrem pobočky (${(branchAvgShare*100).toFixed(1).replace('.',',')} %). U každého železa nabídni navázanou službu — srovnání na průměr je dnes zhruba <b style="color:var(--accent3)">+${fmt(extraProv)}</b> provize. Cíl dne: navrhnout službu u <b>každé</b> zakázky.`,
+      cta: { label: 'Službový expert', url: L.sluzby }, cta2: { label: 'Coach 5P', url: L.coach },
+    });
+  }
+  // C) Vratky ukrajují provizi
+  if (retImpact.lost > Math.max(50, curProv * 0.05)) {
+    missionCandidates.push({
+      id: 'returns', prio: 70, metric: '−' + fmt(retImpact.lost), metricLabel: 'ztráta z vratek', metricColor: 'var(--red)',
+      title: 'Dnešní mise: snížit vratkovost',
+      body: `Vratky tě tento měsíc stály odhadem <b style="color:var(--red)">−${fmt(retImpact.lost)}</b> provize. Často jde o nedotažený výběr produktu nebo nereálná očekávání. Dnes věnuj extra péči zjišťování potřeb a poctivému doporučení — kvalitní prodej se nevrací.`,
+      cta: { label: 'Coach 5P · námitky', url: L.coach },
+    });
+  }
+  // D) 75–100 % → cesta k plnému násobiči
+  if (myFill >= 0.75 && myFill < 1.0 && asrTgt > 0 && attendance > 0) {
+    const need = Math.max(asrTgt * attendance - curRev, 0);
+    const at100 = commissionFromRevenue(curZeleze + need * pctZelezo, curSluzby + need * pctSluzby, 1.0);
+    const delta = Math.max(at100 - curProv, 0);
+    missionCandidates.push({
+      id: 'to100', prio: 60, metric: fmtPct(myFill), metricLabel: 'aktuální plnění', metricColor: 'var(--yellow)',
+      title: 'Dnešní mise: dotáhnout plnění na 100 %',
+      body: `Do plného násobiče ti chybí <b>${fmt(need)}</b> obratu, což je zhruba <b style="color:var(--accent3)">+${fmt(delta)}</b> provize. Soustřeď se na upsell u rozjednaných zakázek a důsledné uzavírání rozhovorů.`,
+      cta: { label: 'Coach 5P', url: L.coach }, cta2: { label: 'Product Research', url: L.product },
+    });
+  }
+  // E) NPS nízké → kvalita
+  if (npsVal > 0 && npsVal < 4) {
+    missionCandidates.push({
+      id: 'nps', prio: 55, metric: fmtN2(npsVal), metricLabel: 'CCT NPS', metricColor: 'var(--yellow)',
+      title: 'Dnešní mise: zapracovat na kvalitě rozhovoru',
+      body: `Tvé CCT NPS je <b>${fmtN2(npsVal)}</b> — zákaznický dojem má rezervu. Zpomal, naslouchej a uzavírej rozhovor jistě a vstřícně. Spokojený zákazník = méně vratek a vyšší share služeb.`,
+      cta: { label: 'Coach 5P · zákaznický zážitek', url: L.coach },
+    });
+  }
+  // F) Vše v pořádku → udržovací / rozvojová mise
+  if (missionCandidates.length === 0) {
+    missionCandidates.push({
+      id: 'maintain', prio: 10, metric: readiness + '/100', metricLabel: 'readiness', metricColor: 'var(--green)',
+      title: 'Dnešní mise: drž laťku a rozvíjej se',
+      body: `Výkonem jsi v dobré kondici — readiness <b>${readiness}/100</b>. Dnes nejde o hašení, ale o náskok: zkus si simulaci náročného zákazníka v Coachovi nebo načerpej novinky, ať jsi o krok napřed.`,
+      cta: { label: 'Simulace v Coachovi 5P', url: L.coach }, cta2: { label: 'Žaneta', url: L.zaneta },
+    });
+  }
+
+  missionCandidates.sort((a, b) => b.prio - a.prio);
+  const mission = missionCandidates[0];
+
+  // Stav splnění (smyčka)
+  const missionsStore = mvLoadMissions();
+  const todayK = mvTodayKey();
+  const personMissions = missionsStore[personName] || {};
+  const todayRec = personMissions[todayK];
+  const isDone = todayRec && todayRec.missionId === mission.id && todayRec.done;
+
+  document.getElementById('mv-mission').innerHTML = `
+    <div class="mv-mission-card ${isDone ? 'done' : ''}">
+      <div class="mv-mission-metric">
+        <div class="v" style="color:${mission.metricColor}">${mission.metric}</div>
+        <div class="l">${mission.metricLabel}</div>
+      </div>
+      <div class="mv-mission-eyebrow">◎ Mise dne ${isDone ? '· splněno ✓' : ''}</div>
+      <div class="mv-mission-title">${mission.title}</div>
+      <div class="mv-mission-body">${mission.body}</div>
+      <div class="mv-mission-actions">
+        <a class="mv-mission-btn" href="${mission.cta.url}" target="_blank" rel="noopener" onclick="mvOpenedTool('${mission.id}')">${mission.cta.label} ↗</a>
+        ${mission.cta2 ? `<a class="mv-mission-btn secondary" href="${mission.cta2.url}" target="_blank" rel="noopener">${mission.cta2.label} ↗</a>` : ''}
+        <button class="mv-mission-btn secondary" onclick="mvToggleMissionDone('${mission.id}')" style="margin-left:auto;">${isDone ? '↺ Označit jako nesplněné' : '✓ Hotovo — vyhodnotit'}</button>
+      </div>
+    </div>`;
+
+  /* ══════════════════════════════════════════════════════════
+     VRSTVA 1: KPI STRIP (diagnóza)
+     ────────────────────────────────────────────────────────── */
   const kpiItems = [
     { label: 'Plán hodin', value: fmtN2(planH) + ' h', color: 'var(--accent2)' },
     { label: 'Odprac. hodin', value: fmtN2(attendance) + ' h', color: 'var(--accent)' },
@@ -6544,7 +7065,34 @@ function mvRender() {
     </div>
   `).join('');
 
-  // ---- Render chybějící obrat ----
+  /* ── TREND grafu z historie ── */
+  mvRenderTrend(personName, myFill);
+
+  /* ── KOHORTA ── */
+  (function renderCohort() {
+    const pctRank = total > 0 ? (1 - (rank - 1) / total) : 0; // 1 = nejlepší
+    const top20Cut = cohort.top20;
+    const inTop20 = myFill >= top20Cut && top20Cut > 0;
+    const vsMedian = myFill - cohort.median;
+    const el = document.getElementById('mv-cohort');
+    el.innerHTML = `
+      <div class="mv-cohort-rank">
+        <div class="big" style="color:${level.color}">${rank || '—'}.</div>
+        <div class="of">z ${total} na pobočce</div>
+      </div>
+      <div style="font-size:12px;color:${level.color};font-weight:700;">${inTop20 ? '★ Patříš do TOP 20 %' : 'Výkonem ' + level.label}</div>
+      <div class="mv-cohort-pct-track">
+        <div class="mv-cohort-pct-fill" style="width:${(pctRank*100).toFixed(0)}%;background:${level.color};"></div>
+        <div class="mv-cohort-marker" style="left:calc(${(pctRank*100).toFixed(0)}% - 1px);"></div>
+      </div>
+      <div style="font-size:10px;color:var(--dim);text-align:right;margin-bottom:12px;">percentil ${(pctRank*100).toFixed(0)}.</div>
+      <div class="mv-cohort-row"><span class="lbl">Moje ASR/Hrs Fill</span><span class="val" style="color:${level.color}">${fmtPct(myFill)}</span></div>
+      <div class="mv-cohort-row"><span class="lbl">Medián pobočky</span><span class="val">${fmtPct(cohort.median)}</span></div>
+      <div class="mv-cohort-row"><span class="lbl">Průměr TOP 20 %</span><span class="val" style="color:var(--accent3)">${fmtPct(cohort.top20)}</span></div>
+      <div class="mv-cohort-row"><span class="lbl">Rozdíl vůči mediánu</span><span class="val" style="color:${vsMedian>=0?'var(--green)':'var(--red)'}">${(vsMedian>=0?'+':'−')+fmtPct(Math.abs(vsMedian)).replace(' %','')} p.b.</span></div>`;
+  })();
+
+  /* ── chybějící obrat ── */
   const obratItems = [
     { label: 'Chybí k dosavadnímu cíli',
       value: fmtSigned(chybejiciAktualniObrat),
@@ -6564,7 +7112,7 @@ function mvRender() {
     </div>
   `).join('');
 
-  // ---- Provize ----
+  /* ── Provize ── */
   const provItems = [
     { label: 'Aktuální provize (est.)', value: fmt(curProv), color: 'var(--text)' },
     { label: 'Ztráta provize', value: fmt(ztrataProv), color: ztrataProv > 0 ? 'var(--red)' : 'var(--green)' },
@@ -6577,7 +7125,7 @@ function mvRender() {
     </div>
   `).join('');
 
-  // ---- Denní cíl ----
+  /* ── Denní cíl ── */
   const denItems = [
     { label: `Zbývající směny (${mvShiftLen}h)`, value: fmtN2(zbyvSmeny) + ' směn' },
     { label: 'Cíl na směnu (celkem)', value: fmt(denCil) },
@@ -6591,76 +7139,50 @@ function mvRender() {
     </div>
   `).join('');
 
-  // ══ Cesty k navýšení výkonu (kvantifikované na Kč provize) ══
+  /* ── Cesty k navýšení výkonu ── */
   (function renderPaths() {
     const cards = [];
     const fmtK = v => Math.round(v).toLocaleString('cs-CZ') + ' Kč';
-    const myFillNow = parseFloat(u.asrHrsFill) || 0;     // aktuální plnění (podíl)
-    const att = attendance;                              // odpracované hodiny
-    const baseTarget = asrTgt * att;                     // obrat odpovídající 100 % za odpracované hodiny
+    const myFillNow = parseFloat(u.asrHrsFill) || 0;
+    const att = attendance;
+    const baseTarget = asrTgt * att;
 
-    // 1) Pásmo násobiče — kolik obratu chybí k odemčení vyššího násobiče
     if (att > 0 && asrTgt > 0) {
       if (myFillNow < 0.75) {
         const need = Math.max(baseTarget * 0.75 - curRev, 0);
         const unlock = commissionFromRevenue(curZeleze + need * pctZelezo, curSluzby + need * pctSluzby, 0.75);
-        cards.push({
-          icon: '🔒', color: 'var(--red)',
-          title: 'Jsi pod 75 % — provize z obratu je nulová',
-          body: `Při plnění pod 75 % je násobič 0, takže z železa i služeb teď nemáš žádnou provizi. Chybí ti <b>${fmtK(need)}</b> asistovaného obratu k překročení hranice 75 % — tím odemkneš zhruba <b style="color:var(--green)">${fmtK(unlock)}</b> provize.`,
-        });
+        cards.push({ icon: '🔒', color: 'var(--red)', title: 'Jsi pod 75 % — provize z obratu je nulová',
+          body: `Při plnění pod 75 % je násobič 0, takže z železa i služeb teď nemáš žádnou provizi. Chybí ti <b>${fmtK(need)}</b> asistovaného obratu k překročení hranice 75 % — tím odemkneš zhruba <b style="color:var(--green)">${fmtK(unlock)}</b> provize.` });
       } else if (myFillNow < 1.0) {
         const need = Math.max(baseTarget - curRev, 0);
         const at100 = commissionFromRevenue(curZeleze + need * pctZelezo, curSluzby + need * pctSluzby, 1.0);
         const delta = Math.max(at100 - curProv, 0);
-        cards.push({
-          icon: '↗', color: 'var(--yellow)',
-          title: 'Cesta k plnému násobiči (100 %)',
-          body: `Do 100 % plnění ti chybí <b>${fmtK(need)}</b> obratu. Dotažením vyroste násobič na 1,0 a tvoje provize zhruba o <b style="color:var(--green)">+${fmtK(delta)}</b>.`,
-        });
+        cards.push({ icon: '↗', color: 'var(--yellow)', title: 'Cesta k plnému násobiči (100 %)',
+          body: `Do 100 % plnění ti chybí <b>${fmtK(need)}</b> obratu. Dotažením vyroste násobič na 1,0 a tvoje provize zhruba o <b style="color:var(--green)">+${fmtK(delta)}</b>.` });
       } else if (myFillNow < 1.20) {
         const need = Math.max(baseTarget * 1.20 - curRev, 0);
         const at120 = commissionFromRevenue(curZeleze + need * pctZelezo, curSluzby + need * pctSluzby, 1.20);
         const delta = Math.max(at120 - curProv, 0);
-        cards.push({
-          icon: '🚀', color: 'var(--accent)',
-          title: 'Strop násobiče 1,2 na dosah',
-          body: `Násobič roste lineárně až do 120 %. Dalších <b>${fmtK(need)}</b> obratu tě dostane na maximální násobič 1,2 — to je zhruba <b style="color:var(--green)">+${fmtK(delta)}</b> provize navíc.`,
-        });
+        cards.push({ icon: '🚀', color: 'var(--accent)', title: 'Strop násobiče 1,2 na dosah',
+          body: `Násobič roste lineárně až do 120 %. Dalších <b>${fmtK(need)}</b> obratu tě dostane na maximální násobič 1,2 — to je zhruba <b style="color:var(--green)">+${fmtK(delta)}</b> provize navíc.` });
       } else {
-        cards.push({
-          icon: '🏆', color: 'var(--green)',
-          title: 'Maximální násobič 1,2 dosažen',
-          body: `Jsi nad 120 % plnění, využíváš maximální násobič. Drž tempo a soustřeď se na kvalitu (CCT NPS) a podíl služeb.`,
-        });
+        cards.push({ icon: '🏆', color: 'var(--green)', title: 'Maximální násobič 1,2 dosažen',
+          body: `Jsi nad 120 % plnění, využíváš maximální násobič. Drž tempo a soustřeď se na kvalitu (CCT NPS) a podíl služeb.` });
       }
     }
 
-    // 2) Share služeb vs. průměr pobočky
-    const branchUsers = (DATA.userPerf || []).filter(x => x.branch === u.branch && x.attendance > 0);
-    const branchAvgShare = branchUsers.length
-      ? branchUsers.reduce((s, x) => s + (parseFloat(x.shareASRServices) || 0), 0) / branchUsers.length : 0;
-    const myShare = parseFloat(u.shareASRServices) || 0;
-    if (branchAvgShare > 0 && myShare < branchAvgShare * 0.95 && curRev > 0) {
-      // kolik služeb by odpovídalo průměru pobočky při mém obratu
+    if (branchAvgShare > 0 && shareSvc < branchAvgShare * 0.95 && curRev > 0) {
       const targetSvc = curRev * branchAvgShare;
       const extraSvc = Math.max(targetSvc - curSluzby, 0);
       const extraProv = extraSvc * 0.075 * commissionMultiplier(myFillNow || 1);
-      cards.push({
-        icon: '🧩', color: 'var(--accent2)',
-        title: 'Podíl služeb pod průměrem pobočky',
-        body: `Tvůj podíl služeb je <b>${(myShare*100).toFixed(1).replace('.',',')} %</b>, průměr pobočky <b>${(branchAvgShare*100).toFixed(1).replace('.',',')} %</b>. Srovnání na průměr by při tvém obratu znamenalo ~<b>${fmtK(extraSvc)}</b> obratu ve službách navíc (provize 7,5 % vs. 0,68 % na železe) = zhruba <b style="color:var(--green)">+${fmtK(extraProv)}</b>.`,
-      });
+      cards.push({ icon: '🧩', color: 'var(--accent2)', title: 'Podíl služeb pod průměrem pobočky',
+        body: `Tvůj podíl služeb je <b>${(shareSvc*100).toFixed(1).replace('.',',')} %</b>, průměr pobočky <b>${(branchAvgShare*100).toFixed(1).replace('.',',')} %</b>. Srovnání na průměr by při tvém obratu znamenalo ~<b>${fmtK(extraSvc)}</b> obratu ve službách navíc (provize 7,5 % vs. 0,68 % na železe) = zhruba <b style="color:var(--green)">+${fmtK(extraProv)}</b>.` });
     }
 
-    // 3) Dopad vratek na provizi
     const ri = returnsCommissionImpact(personName, myFillNow || 1);
     if (ri.lost > 0.5) {
-      cards.push({
-        icon: '↩', color: 'var(--red)',
-        title: 'Vratky ti ukrajují z provize',
-        body: `Vrácené zakázky (železo ${fmtK(ri.prod)} + služby ${fmtK(ri.svc)}) tě tento měsíc stály odhadem <b style="color:var(--red)">−${fmtK(ri.lost)}</b> provize. Důslednější dotažení a kvalita prodeje snižuje vratkovost.`,
-      });
+      cards.push({ icon: '↩', color: 'var(--red)', title: 'Vratky ti ukrajují z provize',
+        body: `Vrácené zakázky (železo ${fmtK(ri.prod)} + služby ${fmtK(ri.svc)}) tě tento měsíc stály odhadem <b style="color:var(--red)">−${fmtK(ri.lost)}</b> provize. Důslednější dotažení a kvalita prodeje snižuje vratkovost.` });
     }
 
     if (cards.length === 0) {
@@ -6679,48 +7201,24 @@ function mvRender() {
     `).join('');
   })();
 
-  // ---- Na čem potřebuji zapracovat (doporučené nástroje dle plnění) ----
-  const shareSvc = parseFloat(u.shareASRServices) || 0; // podíl, 0.03 = 3 %
-  const fillVal = parseFloat(u.asrHrsFill) || 0;        // podíl, 1.0 = 100 %
-  const L = {
-    coach: 'https://chatgpt.com/g/g-69a47d10742481918080d44399ee6e5a-prodejni-coach-5p',
-    sluzby: 'https://chatgpt.com/g/g-6971e68e98b08191b56f28d53387995f-alza-sluzby-expert',
-    product: 'https://gemini.google.com/gem/1l5mZZDKf2HFcBRQvrIhk4-osehmqSldN?usp=sharing',
-    zaneta: 'https://notebooklm.google.com/notebook/33f161d4-b294-40f3-b5e9-4789b869bc98',
-  };
+  /* ── Na čem zapracovat ── */
+  const fillVal = parseFloat(u.asrHrsFill) || 0;
   const toolCards = [];
   if (shareSvc < 0.03) {
-    toolCards.push({
-      text: 'Máš větší potenciál v barvení zakázek službami. Pokud si nevíš rady, může ti pomoci Prodejní coach (Alza5P), nebo přímo Služby Expert.',
-      links: [
-        { label: 'Prodejní coach 5P', url: L.coach },
-        { label: 'Služby Expert', url: L.sluzby },
-      ],
-    });
+    toolCards.push({ text: 'Máš větší potenciál v barvení zakázek službami. Pokud si nevíš rady, může ti pomoci Prodejní coach (Alza5P), nebo přímo Služby Expert.',
+      links: [{ label: 'Prodejní coach 5P', url: L.coach }, { label: 'Služby Expert', url: L.sluzby }] });
   }
   if (fillVal < 1) {
-    toolCards.push({
-      text: 'Využívání svého času efektivně a kvalita prodejních rozhovorů je hlavní cesta k navýšení asistovaného obratu. Nezapomínej, že každá zakázka by měla být správně cross-sellovaná a upsellovaná. Zároveň je důležité mít dostatečnou míru zbožíznalství a přehled o novinkách. Pomoct ti může Product Research bot a Prodejní coach (Alza5P).',
-      links: [
-        { label: 'Prodejní coach 5P', url: L.coach },
-        { label: 'Product Research', url: L.product },
-      ],
-    });
+    toolCards.push({ text: 'Využívání svého času efektivně a kvalita prodejních rozhovorů je hlavní cesta k navýšení asistovaného obratu. Nezapomínej, že každá zakázka by měla být správně cross-sellovaná a upsellovaná. Zároveň je důležité mít dostatečnou míru zbožíznalství a přehled o novinkách. Pomoct ti může Product Research bot a Prodejní coach (Alza5P).',
+      links: [{ label: 'Prodejní coach 5P', url: L.coach }, { label: 'Product Research', url: L.product }] });
   }
   if (fillVal > 1 && shareSvc > 0.03) {
-    toolCards.push({
-      text: 'Prodejně si vedeš velmi dobře, neznamená to ale, že si můžeme dovolit usnout na vavřínech. Můžeš zatím načerpat znalosti z Žanety, nebo si zkusit nasimulovat prodejní rozhovor v Coachovi.',
-      links: [
-        { label: 'Prodejní coach 5P', url: L.coach },
-        { label: 'Žaneta', url: L.zaneta },
-      ],
-    });
+    toolCards.push({ text: 'Prodejně si vedeš velmi dobře, neznamená to ale, že si můžeme dovolit usnout na vavřínech. Můžeš zatím načerpat znalosti z Žanety, nebo si zkusit nasimulovat prodejní rozhovor v Coachovi.',
+      links: [{ label: 'Prodejní coach 5P', url: L.coach }, { label: 'Žaneta', url: L.zaneta }] });
   }
   if (toolCards.length === 0) {
-    toolCards.push({
-      text: 'Aktuálně se držíš v rovnováze. Pokud chceš dál růst, mrkni na rozcestník nástrojů pod tlačítkem „Zobrazit více".',
-      links: [{ label: 'Prodejní coach 5P', url: L.coach }],
-    });
+    toolCards.push({ text: 'Aktuálně se držíš v rovnováze. Pokud chceš dál růst, mrkni na rozcestník nástrojů pod tlačítkem „Zobrazit více".',
+      links: [{ label: 'Prodejní coach 5P', url: L.coach }] });
   }
   document.getElementById('mv-tools').innerHTML = toolCards.map(c => `
     <div class="mv-tool-card">
@@ -6731,7 +7229,7 @@ function mvRender() {
     </div>
   `).join('');
 
-  // ---- Porovnání ----
+  /* ── Porovnání s kolegy ── */
   const compHtml = `
     <div style="display:flex; gap:24px; align-items:center; flex-wrap:wrap; margin-bottom:16px;">
       <div>
@@ -6780,6 +7278,295 @@ function mvRender() {
     </div>
   `;
   document.getElementById('mv-comparison').innerHTML = compHtml;
+  const compBranchEl = document.getElementById('mv-comparison-branch');
+  if (compBranchEl) compBranchEl.textContent = mvBranch;
+}
+
+/* ── TREND graf z historie (Chart.js) ── */
+function mvRenderTrend(personName, currentFill) {
+  const hist = mvLoadHistory()[personName] || {};
+  const keys = Object.keys(hist).sort();
+  const wrap = document.getElementById('mv-trend-chart-wrap');
+  const empty = document.getElementById('mv-trend-empty');
+  const verdictEl = document.getElementById('mv-trend-verdict');
+
+  if (keys.length < 2) {
+    wrap.style.display = 'none';
+    empty.style.display = 'block';
+    verdictEl.innerHTML = '';
+    if (mvTrendChartInstance) { mvTrendChartInstance.destroy(); mvTrendChartInstance = null; }
+    return;
+  }
+  wrap.style.display = 'block';
+  empty.style.display = 'none';
+
+  const labels = keys.map(k => {
+    const [y, m] = k.split('-');
+    return MV_MONTHS_CZ[parseInt(m,10)-1].slice(0,3) + ' ' + y.slice(2);
+  });
+  const myData = keys.map(k => (hist[k].fill || 0) * 100);
+  const medData = keys.map(k => (hist[k].cohortMedian || 0) * 100);
+  const topData = keys.map(k => (hist[k].cohortTop20 || 0) * 100);
+
+  // verdikt trendu (lineární regrese)
+  const pts = myData.map((y, i) => ({ x: i, y: y / 100 }));
+  const td = mvTrendDirection(pts);
+  const arrow = td.dir === 'up' ? '▲' : td.dir === 'down' ? '▼' : '▬';
+  verdictEl.innerHTML = `<span style="font-size:11px;font-weight:700;color:${td.color};background:${td.color}1a;border:1px solid ${td.color};border-radius:20px;padding:4px 11px;white-space:nowrap;">${arrow} ${td.label}</span>`;
+
+  if (mvTrendChartInstance) { mvTrendChartInstance.destroy(); }
+  const ctx = document.getElementById('mv-trend-chart').getContext('2d');
+  const css = getComputedStyle(document.documentElement);
+  const cAccent = css.getPropertyValue('--accent').trim() || '#7abf2e';
+  const cMuted = css.getPropertyValue('--muted').trim() || '#6b859a';
+  const cText = css.getPropertyValue('--text').trim() || '#dde8f0';
+  const cBorder = css.getPropertyValue('--border').trim() || 'rgba(56,82,120,0.45)';
+  const cTop = css.getPropertyValue('--accent3').trim() || '#a8d060';
+
+  mvTrendChartInstance = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels,
+      datasets: [
+        { label: 'Můj Fill', data: myData, borderColor: cAccent, backgroundColor: cAccent + '22',
+          borderWidth: 2.5, tension: 0.3, fill: true, pointRadius: 3, pointBackgroundColor: cAccent },
+        { label: 'Medián týmu', data: medData, borderColor: cMuted, borderWidth: 1.5, borderDash: [5,4],
+          tension: 0.3, fill: false, pointRadius: 0 },
+        { label: 'TOP 20 %', data: topData, borderColor: cTop, borderWidth: 1.5, borderDash: [2,3],
+          tension: 0.3, fill: false, pointRadius: 0 },
+      ]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      interaction: { mode: 'index', intersect: false },
+      plugins: {
+        legend: { display: true, position: 'bottom', labels: { color: cMuted, font: { size: 10 }, boxWidth: 14, padding: 12, usePointStyle: true } },
+        tooltip: { callbacks: { label: c => `${c.dataset.label}: ${c.parsed.y.toFixed(1).replace('.',',')} %` } }
+      },
+      scales: {
+        y: { ticks: { color: cMuted, font: { size: 10 }, callback: v => v + ' %' }, grid: { color: cBorder } },
+        x: { ticks: { color: cMuted, font: { size: 10 } }, grid: { display: false } }
+      }
+    }
+  });
+}
+
+/* ════════════════════════════════════════════════════════════════════
+   MISE DNE — smyčka (splnění → vyhodnocení → propíše se)
+   ════════════════════════════════════════════════════════════════════ */
+function mvOpenedTool(missionId) {
+  // jen měkká stopa: označíme, že uživatel otevřel doporučený nástroj
+  const store = mvLoadMissions();
+  const person = document.getElementById('mv-person-select').value;
+  if (!person) return;
+  if (!store[person]) store[person] = {};
+  const k = mvTodayKey();
+  store[person][k] = Object.assign({}, store[person][k], { missionId, opened: true });
+  mvSaveMissions(store);
+}
+
+function mvToggleMissionDone(missionId) {
+  const store = mvLoadMissions();
+  const person = document.getElementById('mv-person-select').value;
+  if (!person) return;
+  if (!store[person]) store[person] = {};
+  const k = mvTodayKey();
+  const cur = store[person][k];
+  const nowDone = !(cur && cur.missionId === missionId && cur.done);
+  store[person][k] = { missionId, done: nowDone, ts: Date.now() };
+  mvSaveMissions(store);
+  mvRender(); // smyčka: překreslí stav mise
+}
+
+/* ════════════════════════════════════════════════════════════════════
+   DODAT DATA — historická měsíční hlášení
+   ════════════════════════════════════════════════════════════════════ */
+function mvOpenDataModal() {
+  const modal = document.getElementById('mv-data-modal');
+  // náhledový výběr osoby — všichni z dat i z historie
+  const sel = document.getElementById('mv-data-person');
+  const mainSel = document.getElementById('mv-person-select');
+  const fromData = (DATA.userPerf || [])
+    .filter(u => u.attendance > 0).map(u => u.name);
+  const fromHist = Object.keys(mvLoadHistory());
+  let names = [...new Set([...fromData, ...fromHist])].sort((a,b)=>a.localeCompare(b,'cs'));
+  sel.innerHTML = names.map(n => `<option value="${n.replace(/"/g,'&quot;')}">${n}</option>`).join('');
+  if (mainSel.value && names.includes(mainSel.value)) sel.value = mainSel.value;
+  sel.onchange = mvRenderDataMonths;
+  mvRenderDataMonths();
+  modal.style.display = 'flex';
+}
+function mvCloseDataModal() {
+  document.getElementById('mv-data-modal').style.display = 'none';
+}
+
+/* Kolik osob má daný měsíc v historii (napříč všemi jmény) */
+function mvMonthPeopleCount(ym) {
+  const hist = mvLoadHistory();
+  let live = 0, uploaded = 0;
+  Object.keys(hist).forEach(name => {
+    const rec = hist[name][ym];
+    if (rec) { if (rec.live) live++; else uploaded++; }
+  });
+  return { live, uploaded, total: live + uploaded };
+}
+
+function mvRenderDataMonths() {
+  const person = document.getElementById('mv-data-person').value;
+  const personHist = mvLoadHistory()[person] || {};
+  const now = new Date();
+  const year = now.getFullYear();
+  const curMonthIdx = now.getMonth(); // 0-based
+  const container = document.getElementById('mv-data-months');
+  let rows = '';
+  for (let m = 0; m <= curMonthIdx; m++) {
+    const ym = year + '-' + String(m+1).padStart(2,'0');
+    const cnt = mvMonthPeopleCount(ym);
+    const pRec = personHist[ym];
+    const isLive = cnt.live > 0 && cnt.uploaded === 0;  // měsíc pochází z živého hlášení
+    const filled = cnt.total > 0;
+
+    // status: globální počet osob + náhled vybrané osoby
+    let status;
+    if (!filled) {
+      status = 'Bez dat — nahraj měsíční hlášení';
+    } else {
+      const who = pRec ? `${person.split(/\s+/).slice(0,1)} ${(pRec.fill*100).toFixed(1).replace('.',',')} %` : 'náhled osoby chybí';
+      status = `${cnt.total} ${mvSklon(cnt.total)} uloženo${isLive ? ' · z aktuálního hlášení' : ''} · <span style="color:var(--dim)">${pRec ? 'tvůj Fill '+(pRec.fill*100).toFixed(1).replace('.',',')+' %' : 'tato osoba bez dat'}</span>`;
+    }
+
+    rows += `
+      <div class="mv-month-row ${filled?'filled':''}">
+        <div class="mn">${MV_MONTHS_CZ[m]} ${year}</div>
+        <div class="st">${status}</div>
+        ${isLive ? '<span style="font-size:11px;color:var(--dim);">🔒 živé</span>'
+          : `<button class="mv-file-btn" onclick="document.getElementById('mv-file-${ym}').click()">${filled?'Nahradit':'Nahrát .xlsx'}</button>
+             <input type="file" id="mv-file-${ym}" accept=".xlsx,.xls" style="display:none" onchange="mvHandleMonthFile('${ym}',this)">
+             ${filled?`<button class="mv-month-clear" title="Smazat měsíc pro všechny" onclick="mvDeleteMonth('${ym}')">✕</button>`:''}`}
+      </div>`;
+  }
+  container.innerHTML = rows;
+  const totalPeople = Object.keys(mvLoadHistory()).length;
+  document.getElementById('mv-data-status').textContent =
+    `${totalPeople} ${mvSklon(totalPeople)} v historii`;
+}
+
+/* České skloňování "osoba" */
+function mvSklon(n) {
+  if (n === 1) return 'osoba';
+  if (n >= 2 && n <= 4) return 'osoby';
+  return 'osob';
+}
+
+/* Nahrání měsíčního hlášení → ulož data VŠECH zaměstnanců za daný měsíc */
+function mvHandleMonthFile(ym, input) {
+  const file = input.files && input.files[0];
+  if (!file) return;
+  const statusEl = document.getElementById('mv-data-status');
+  statusEl.textContent = 'Načítám…';
+  const reader = new FileReader();
+  reader.onload = e => {
+    try {
+      const wb = XLSX.read(new Uint8Array(e.target.result), { type: 'array' });
+      const parsed = mvParseMonthlyWorkbook(wb);
+      if (!parsed || parsed.length === 0) {
+        statusEl.textContent = '⚠️ V souboru nenalezen list User Performance.';
+        input.value = ''; return;
+      }
+      // kohorty pro každou pobočku v souboru
+      const cohorts = mvCohortByBranch(parsed.map(x => ({ branch: x.branch, fill: x.fill, att: x.att })));
+
+      const hist = mvLoadHistory();
+      let saved = 0;
+      parsed.forEach(p => {
+        if (!p.name || !(p.att > 0)) return;
+        if (!hist[p.name]) hist[p.name] = {};
+        const c = cohorts[p.branch] || { median: 0, top20: 0 };
+        hist[p.name][ym] = {
+          fill: p.fill, share: p.share, nps: p.nps, rev: p.rev, att: p.att,
+          branch: p.branch, cohortMedian: c.median, cohortTop20: c.top20, live: false,
+        };
+        saved++;
+      });
+      mvSaveHistory(hist);
+      statusEl.textContent = `✓ ${MV_MONTHS_CZ[parseInt(ym.split('-')[1],10)-1]} uloženo pro ${saved} ${mvSklon(saved)}`;
+      mvRenderDataMonths();
+      mvRender(); // smyčka: trend a kohorta se hned překreslí
+    } catch (err) {
+      statusEl.textContent = '⚠️ Soubor se nepodařilo načíst.';
+    }
+    input.value = '';
+  };
+  reader.readAsArrayBuffer(file);
+}
+
+/* Lehký parser jen pro list User Performance (pro historická hlášení) */
+function mvParseMonthlyWorkbook(wb) {
+  const sheetName = wb.SheetNames.find(s => /user\s*performance/i.test(s))
+                 || wb.SheetNames.find(s => /performance/i.test(s) && !/branch/i.test(s));
+  if (!sheetName) return null;
+  const ws = wb.Sheets[sheetName];
+  const raw = XLSX.utils.sheet_to_json(ws, { header: 1, defval: null });
+  if (raw.length < 4) return null;
+
+  // najdi řádek hlavičky (obsahuje "BranchName" nebo "Full")
+  let hdrRow = -1;
+  for (let i = 0; i < Math.min(raw.length, 6); i++) {
+    const joined = (raw[i] || []).map(c => String(c||'').toLowerCase()).join('|');
+    if (joined.includes('branchname') || joined.includes('full name') || joined.includes('asr/hrs')) { hdrRow = i; break; }
+  }
+  if (hdrRow < 0) hdrRow = 2;
+  const hdr = (raw[hdrRow] || []).map(c => String(c||'').toLowerCase().trim());
+  const findCol = (kws, not, fb) => {
+    const idx = hdr.findIndex(h => kws.every(k => h.includes(k)) && (!not || !not.some(n => h.includes(n))));
+    return idx >= 0 ? idx : fb;
+  };
+  const cBranch = findCol(['branchname'], null, 0);
+  const cName   = findCol(['full','name'], null, 1);
+  const cAtt    = findCol(['attendance'], null, 2);
+  const cRevSvc = findCol(['asist','revenue','services'], null, 15);
+  const cRevPrd = findCol(['asist','revenue','products'], null, 22);
+  const cFill   = findCol(['asr/hrs','fill'], null, 25);
+  const cNps    = findCol(['cct','nps'], null, 27);
+  const cShare  = findCol(['share','asr','services'], null, 31);
+
+  const out = [];
+  const N = v => { const n = parseFloat(String(v).replace(/\s/g,'').replace(',','.')); return isNaN(n)?0:n; };
+  for (let i = hdrRow + 1; i < raw.length; i++) {
+    const row = raw[i];
+    if (!row || !row[cBranch] || !row[cName] || String(row[cBranch]).toLowerCase()==='branchname') continue;
+    out.push({
+      branch: String(row[cBranch]).trim(),
+      name: String(row[cName]).trim(),
+      att: N(row[cAtt]),
+      fill: N(row[cFill]),
+      nps: N(row[cNps]),
+      share: N(row[cShare]),
+      rev: N(row[cRevPrd]) + N(row[cRevSvc]),
+    });
+  }
+  return out;
+}
+
+/* Smazat daný měsíc pro VŠECHNY osoby */
+function mvDeleteMonth(ym) {
+  if (!confirm(`Smazat ${MV_MONTHS_CZ[parseInt(ym.split('-')[1],10)-1]} pro všechny zaměstnance?`)) return;
+  const hist = mvLoadHistory();
+  Object.keys(hist).forEach(name => { if (hist[name][ym]) delete hist[name][ym]; });
+  // ukliď prázdné osoby
+  Object.keys(hist).forEach(name => { if (Object.keys(hist[name]).length === 0) delete hist[name]; });
+  mvSaveHistory(hist);
+  mvCaptureCurrentMonth(); // obnov živý měsíc
+  mvRenderDataMonths();
+  mvRender();
+}
+
+function mvClearHistory() {
+  if (!confirm('Opravdu vymazat veškerou uloženou historii všech zaměstnanců? (Živý aktuální měsíc se hned obnoví z nahraného hlášení.)')) return;
+  mvSaveHistory({});
+  mvCaptureCurrentMonth(); // znovu ulož živý měsíc pro všechny
+  mvRenderDataMonths();
+  mvRender();
 }
 
 function mvExportPNG() {
@@ -6790,7 +7577,6 @@ function mvExportPNG() {
   }
   const personName = document.getElementById('mv-person-select').value || 'mujvykon';
 
-  // Temporarily hide comparison section for export
   const compSection = body.querySelector('[data-mv-comparison-section]');
   if (compSection) compSection.style.display = 'none';
 
@@ -7061,30 +7847,50 @@ function mvExportPNG() {
     <div class="section-eyebrow">05 · Performance</div>
     <div class="section-title">Můj výkon</div>
     <div class="section-lead">
-      Osobní pohled na výkon jednoho zaměstnance s konkrétními, na koruny přepočtenými návrhy, jak výkon navýšit.
+      Osobní koučovací pohled na jednoho zaměstnance. Nejde o pouhý přehled čísel — sekce odpovídá ve třech vrstvách na otázky <strong>Kde stojím?</strong> (diagnóza), <strong>Kam směřuju?</strong> (predikce) a <strong>Co dnes udělám?</strong> (mise dne). Návrhy jsou přepočtené na koruny provize a samy se přizpůsobují aktuálním datům.
     </div>
 
     <div class="callout warn">
       <div class="callout-icon">⚠️</div>
-      <div class="callout-body">Pro úplné fungování sekce Můj výkon je vhodné nahrát <strong>oba soubory</strong> — Denní hlášení i Docházku. Bez nich se nahoře zobrazí upozornění.</div>
+      <div class="callout-body">Pro úplné fungování sekce je vhodné nahrát <strong>oba soubory</strong> — Denní hlášení i Docházku. Bez nich se nahoře zobrazí upozornění.</div>
     </div>
 
-    <h3>Výběr zaměstnance a export</h3>
-    <p>V horní liště vybereš zaměstnance z rozbalovacího seznamu. Tlačítkem <strong>⬇ Export PNG</strong> uložíš celý přehled jako obrázek (např. pro sdílení nebo tisk).</p>
+    <h3>Výběr pobočky, zaměstnance a export</h3>
+    <p>V horní liště nejdřív vybereš <strong>pobočku</strong> (k dispozici jsou všechny pobočky z nahraných dat, ne jen Praha – centrála) a poté <strong>zaměstnance</strong> z dané pobočky. Tlačítkem <strong>＋ Dodat data</strong> otevřeš okno pro nahrání historických měsíčních hlášení (viz níže) a tlačítkem <strong>⬇ Export PNG</strong> uložíš celý přehled jako obrázek pro sdílení nebo tisk.</p>
 
-    <h3>Co sekce obsahuje</h3>
+    <h3>Tři vrstvy sekce</h3>
     <table class="metric-table">
-      <thead><tr><th>Blok</th><th>Co zobrazuje</th></tr></thead>
+      <thead><tr><th>Vrstva</th><th>Otázka</th><th>Co obsahuje</th></tr></thead>
       <tbody>
-        <tr><td>KPI pruh</td><td>Klíčové metriky zaměstnance v jednom řádku — mimo jiné ASR/Hrs Fill, podíl služeb a <strong>CCT NPS</strong>.</td></tr>
-        <tr><td>Chybějící obrat k 100% plnění</td><td>Kolik obratu zbývá k naplnění cíle.</td></tr>
-        <tr><td>Odhadovaná provize</td><td>Rozpad odhadu provize z aktuálních dat.</td></tr>
-        <tr><td>Denní cíl</td><td>Cíl rozpočítaný na jednu směnu, přepínatelný mezi délkou <strong>8</strong> a <strong>12</strong> hodin.</td></tr>
-        <tr><td>Cesty k navýšení výkonu</td><td>Konkrétní kroky přepočtené na koruny provize — o kolik Kč navíc zaměstnanec vydělá, když se posune do vyššího pásma násobiče, zvýší podíl služeb na úroveň pobočky, nebo o kolik ho aktuálně připravují vratky.</td></tr>
-        <tr><td>Na čem potřebuji zapracovat</td><td>Doporučení, kde má zaměstnanec největší rezervy. Tlačítkem <strong>Zobrazit více</strong> se otevře podrobnější rozpis.</td></tr>
-        <tr><td>Porovnání s Praha – centrála</td><td>Srovnání plnění ASR/Hrs Fill zaměstnance vůči pobočce.</td></tr>
+        <tr><td><strong>Mise dne</strong></td><td>Co dnes udělám?</td><td>Jedno konkrétní doporučení dne, vybrané automaticky podle toho, kde má zaměstnanec největší rezervu (např. dostat se nad 75 % plnění, barvit zakázky službami, snížit vratky). Obsahuje odkaz na příslušný nástroj a tlačítko <strong>Hotovo — vyhodnotit</strong>, kterým se mise označí jako splněná. Stav se ukládá v prohlížeči.</td></tr>
+        <tr><td><strong>Readiness skóre</strong></td><td>Kam směřuju?</td><td>Kompozitní skóre připravenosti 0–100 složené ze čtyř složek — plnění, podíl služeb, kvalita (CCT NPS) a vratky. Vizuálně ukazuje, která složka táhne výkon dolů.</td></tr>
+        <tr><td><strong>Run-rate predikce</strong></td><td>Kam směřuju?</td><td>Projekce, na jakém plnění zaměstnanec skončí měsíc při zachování aktuálního tempa, a kolik obratu mu k cíli ještě chybí. Hlásí <strong>alarm stability</strong>, pokud kombinace nízkého plnění a klesajícího trendu spadne pod práh 60 %.</td></tr>
+        <tr><td><strong>Můj trend v čase</strong></td><td>Kde stojím?</td><td>Graf ASR/Hrs Fill napříč měsíci (z nahraných historických hlášení) společně s mediánem týmu a průměrem TOP 20 %. Slovní verdikt z lineární regrese hodnotí směr — <em>Rosteš / Klesáš / Stabilní výkon</em>. Bez historických dat zde sekce vyzve k jejich dodání.</td></tr>
+        <tr><td><strong>Kohorta</strong></td><td>Kde stojím?</td><td>Pořadí zaměstnance na pobočce, percentil, medián pobočky, průměr TOP 20 % a odstup od mediánu v procentních bodech.</td></tr>
+        <tr><td>KPI pruh</td><td>Kde stojím?</td><td>Klíčové metriky v jednom řádku — plán a odpracované hodiny, ASR/Hrs TGT/Real/Fill, podíl služeb a CCT NPS.</td></tr>
+        <tr><td>Chybějící obrat</td><td>Kde stojím?</td><td>Kolik obratu zbývá k naplnění cíle, rozpad na železo a služby.</td></tr>
+        <tr><td>Odhadovaná provize a Denní cíl</td><td>Kde stojím?</td><td>Rozpad odhadu provize z aktuálních dat a cíl rozpočítaný na jednu směnu, přepínatelný mezi délkou <strong>8</strong> a <strong>12</strong> hodin.</td></tr>
+        <tr><td>Cesty k navýšení výkonu</td><td>Co s tím?</td><td>Konkrétní kroky přepočtené na koruny — o kolik Kč víc zaměstnanec vydělá posunem do vyššího pásma násobiče, zvýšením podílu služeb na úroveň pobočky, nebo o kolik ho připravují vratky.</td></tr>
+        <tr><td>Na čem zapracovat</td><td>Co s tím?</td><td>Doporučení s odkazy na nástroje (Prodejní coach 5P, Služby Expert, Product Research, Žaneta). Tlačítkem <strong>Zobrazit více</strong> se otevře podrobnější rozcestník.</td></tr>
+        <tr><td>Porovnání s pobočkou</td><td>Kde stojím?</td><td>Tabulka plnění ASR/Hrs Fill všech kolegů na vybrané pobočce s vyznačením aktuálního zaměstnance.</td></tr>
       </tbody>
     </table>
+
+    <h3>Dodat historická data (＋ Dodat data)</h3>
+    <p>Trend v čase a srovnání s kohortou napříč měsíci potřebují historická data. V okně <strong>＋ Dodat data</strong> ke každému měsíci od ledna nahraješ příslušné <strong>Denní hlášení (.xlsx)</strong>.</p>
+    <div class="callout">
+      <div class="callout-icon">💡</div>
+      <div class="callout-body">Z jednoho měsíčního souboru se uloží data <strong>všech zaměstnanců</strong> najednou — stačí tedy každý měsíc nahrát jen jednou, ne zvlášť pro každého. Po přepnutí na jiného zaměstnance se jeho historie už jen načte, není potřeba nahrávat znovu.</div>
+    </div>
+    <ul>
+      <li><strong>Aktuální měsíc</strong> se plní automaticky z živě nahraného Denního hlášení a je označený zámkem 🔒 — nelze jej přepsat ručně.</li>
+      <li>U každého měsíce vidíš, <strong>kolik osob</strong> v něm je uloženo a náhled Fill právě vybrané osoby (přepíná se v poli <em>Náhled osoby</em>).</li>
+      <li>Tlačítkem <strong>✕</strong> u měsíce smažeš daný měsíc pro všechny; <strong>Vymazat veškerou historii</strong> smaže vše (živý aktuální měsíc se hned obnoví).</li>
+      <li>Data se ukládají pouze lokálně v tomto prohlížeči (localStorage), nikam se neodesílají.</li>
+    </ul>
+
+    <h3>Uzavřená smyčka</h3>
+    <p>Sekce je navržená jako smyčka: výsledek dnešní akce (splněná mise, nová data) se propíše zpět do diagnózy a změní doporučení na další den. Mise dne tak není statická — mění se podle toho, jak se mění čísla.</p>
   </section>
 
 
