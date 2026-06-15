@@ -1877,6 +1877,10 @@
         <span class="sidebar-icon">◰</span>
         <span class="sidebar-label">Můj výkon</span>
       </div>
+      <div class="sidebar-item" id="sbi-team" onclick="sidebarNav('team')">
+        <span class="sidebar-icon">◳</span>
+        <span class="sidebar-label">Porovnání týmu</span>
+      </div>
     </div>
     <div class="sidebar-section">
       <div class="sidebar-item" id="sbi-home" onclick="sidebarNav('home')">
@@ -2233,6 +2237,39 @@
           <div style="margin-left:auto;font-size:11px;color:var(--dim);align-self:center;" id="mv-data-status"></div>
         </div>
       </div>
+    </div>
+  </div>
+
+  <!-- ═══ POROVNÁNÍ TÝMU (manažerský režim) ═══ -->
+  <div id="view-team" style="display:none; padding:28px 28px 40px; width:100%; box-sizing:border-box; overflow-y:auto; height:100%;">
+    <div class="view-header" style="padding-bottom:16px;border-bottom:1px solid var(--border);margin-bottom:20px;display:flex;align-items:center;flex-wrap:wrap;gap:10px;">
+      <div>
+        <div class="view-title" style="margin-bottom:2px;">Porovnání týmu</div>
+        <div style="font-size:12px;color:var(--muted);">Zaškrtni lidi a porovnej je vedle sebe. Klikem na hlavičku sloupce seřadíš.</div>
+      </div>
+      <div class="filter-group" style="margin-left:auto; gap:8px; flex-wrap:wrap;">
+        <span class="filter-label">Pobočka:</span>
+        <select id="team-branch-select" onchange="teamPopulate()" style="min-width:200px;"></select>
+      </div>
+    </div>
+
+    <div id="team-warning" style="display:none; background:rgba(232,184,48,0.12); border:1px solid var(--yellow); border-radius:8px; padding:14px 18px; margin-bottom:20px; color:var(--yellow); font-size:13px; font-weight:600; line-height:1.5;">
+      ⚠️ Nejprve vlož Denní hlášení — bez dat není koho porovnávat.
+    </div>
+
+    <div id="team-body" style="display:none;">
+      <div style="background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:18px 20px; margin-bottom:20px;">
+        <div style="display:flex; align-items:center; gap:12px; margin-bottom:12px; flex-wrap:wrap;">
+          <div class="section-title" style="margin:0;">Výběr lidí <span id="team-count" style="color:var(--muted);font-weight:600;"></span></div>
+          <div style="margin-left:auto; display:flex; gap:8px;">
+            <button class="btn" onclick="teamToggleAll(true)">Vybrat vše</button>
+            <button class="btn" onclick="teamToggleAll(false)">Zrušit výběr</button>
+          </div>
+        </div>
+        <div id="team-people" style="display:grid; grid-template-columns:repeat(auto-fill,minmax(220px,1fr)); gap:8px 18px;"></div>
+      </div>
+
+      <div id="team-result"></div>
     </div>
   </div>
 
@@ -4999,7 +5036,7 @@ function sidebarNav(section) {
   });
 
   // Hide all views
-  ['view-home','view-branch','view-users','view-dochazka','view-brigo-dochazka','view-links','view-kalkulacka','view-asrtgt','view-lunch','view-low-performance','view-mujvykon']
+  ['view-home','view-branch','view-users','view-dochazka','view-brigo-dochazka','view-links','view-kalkulacka','view-asrtgt','view-lunch','view-low-performance','view-mujvykon','view-team']
     .forEach(id => { const el = document.getElementById(id); if (el) el.style.display = 'none'; });
 
   // Nav tabs hidden (no longer in nav bar)
@@ -5010,6 +5047,9 @@ function sidebarNav(section) {
   } else if (section === 'mujvykon') {
     document.getElementById('view-mujvykon').style.display = 'block';
     mvInit();
+  } else if (section === 'team') {
+    document.getElementById('view-team').style.display = 'block';
+    teamInit();
   } else if (section === 'performance' || section === 'branch') {
     switchView('branch');
   } else if (section === 'individual') {
@@ -6664,6 +6704,305 @@ function mvPopulateSelect() {
   if (prev && users.find(u => u.name === prev)) sel.value = prev;
 }
 
+/* ══════════════════════════════════════════════════════════════════════
+   POROVNÁNÍ TÝMU (manažerský režim) — zaškrtni lidi, porovnej vedle sebe
+   ────────────────────────────────────────────────────────────────────── */
+let teamSelected = new Set();          // jména vybraných lidí
+let teamSortCol = 'fill';              // výchozí řazení
+let teamSortDir = -1;                  // -1 sestupně, 1 vzestupně
+const TEAM_ALL_BRANCHES = '__all__';
+
+function teamInit() {
+  const hasData = DATA.userPerf && DATA.userPerf.length > 0;
+  document.getElementById('team-warning').style.display = hasData ? 'none' : 'block';
+  document.getElementById('team-body').style.display = hasData ? 'block' : 'none';
+  if (!hasData) return;
+
+  // Naplň výběr poboček (+ volba „všechny pobočky")
+  const sel = document.getElementById('team-branch-select');
+  const branches = [...new Set((DATA.userPerf || [])
+    .filter(u => u.branch && u.attendance > 0)
+    .map(u => u.branch))].sort((a, b) => a.localeCompare(b, 'cs'));
+  const def = (typeof mvBranch !== 'undefined' && branches.includes(mvBranch)) ? mvBranch : (branches[0] || '');
+  sel.innerHTML =
+    `<option value="${TEAM_ALL_BRANCHES}">— Všechny pobočky —</option>` +
+    branches.map(b => `<option value="${b.replace(/"/g, '&quot;')}">${b}</option>`).join('');
+  sel.value = def;
+  teamSelected = new Set();
+  teamPopulate();
+}
+
+function teamPeople() {
+  const sel = document.getElementById('team-branch-select');
+  const b = sel ? sel.value : TEAM_ALL_BRANCHES;
+  return (DATA.userPerf || [])
+    .filter(u => u.attendance > 0 && (b === TEAM_ALL_BRANCHES || u.branch === b))
+    .sort((a, b2) => a.name.localeCompare(b2.name, 'cs'));
+}
+
+function teamPopulate() {
+  const people = teamPeople();
+  // udrž jen výběr, který v aktuální pobočce existuje
+  const names = new Set(people.map(p => p.name));
+  teamSelected = new Set([...teamSelected].filter(n => names.has(n)));
+
+  document.getElementById('team-people').innerHTML = people.map(p => {
+    const id = 'team-cb-' + btoa(unescape(encodeURIComponent(p.name))).replace(/[^a-zA-Z0-9]/g, '');
+    const checked = teamSelected.has(p.name) ? 'checked' : '';
+    const nm = p.name.replace(/"/g, '&quot;');
+    return `<label for="${id}" style="display:flex;align-items:center;gap:8px;font-size:13px;color:var(--text);cursor:pointer;padding:4px 0;">
+      <input type="checkbox" id="${id}" ${checked} onchange="teamToggle('${nm.replace(/'/g, "\\'")}', this.checked)" style="cursor:pointer;width:15px;height:15px;accent-color:var(--accent);">
+      <span>${p.name}</span>
+    </label>`;
+  }).join('') || '<div style="color:var(--dim);font-size:13px;">Na této pobočce nejsou žádní aktivní lidé.</div>';
+
+  teamRender();
+}
+
+function teamToggle(name, on) {
+  if (on) teamSelected.add(name); else teamSelected.delete(name);
+  teamRender();
+}
+
+function teamToggleAll(on) {
+  const people = teamPeople();
+  if (on) people.forEach(p => teamSelected.add(p.name));
+  else teamSelected.clear();
+  teamPopulate();
+}
+
+function teamSort(col) {
+  if (teamSortCol === col) teamSortDir = -teamSortDir;
+  else { teamSortCol = col; teamSortDir = -1; }
+  teamRender();
+}
+
+/* ── Trend řada (fill po měsících z historie) + mini sparkline ── */
+function teamSeriesFill(name) {
+  const hist = mvLoadHistory()[name] || {};
+  return Object.keys(hist).sort().map(k => (hist[k] && hist[k].fill) || 0).filter(v => v > 0);
+}
+function teamSparkline(series, color) {
+  if (!series || series.length < 2) return '<span style="color:var(--dim);font-size:11px;">—</span>';
+  const w = 84, h = 22, pad = 3;
+  const min = Math.min(...series), max = Math.max(...series), span = (max - min) || 1;
+  const pts = series.map((v, i) => {
+    const x = pad + (i / (series.length - 1)) * (w - 2 * pad);
+    const y = h - pad - ((v - min) / span) * (h - 2 * pad);
+    return `${x.toFixed(1)},${y.toFixed(1)}`;
+  }).join(' ');
+  const lx = pad + (w - 2 * pad), ly = h - pad - ((series[series.length - 1] - min) / span) * (h - 2 * pad);
+  return `<svg width="${w}" height="${h}" viewBox="0 0 ${w} ${h}" style="vertical-align:middle;display:block;">
+    <polyline points="${pts}" fill="none" stroke="${color}" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round"/>
+    <circle cx="${lx.toFixed(1)}" cy="${ly.toFixed(1)}" r="2.1" fill="${color}"/></svg>`;
+}
+function trendShort(td) {
+  if (!td || td.dir === 'flat') return (td && td.n >= 2) ? '▬ stabilní' : '—';
+  const m = Math.abs(td.slope * 100).toFixed(1).replace('.', ',');
+  const a = td.dir === 'up' ? '▲' : '▼';
+  const q = (td.confidence === 'low' || td.confidence === 'none') ? ' ~' : '';
+  return `${a} ${m} p.b.${q}`;
+}
+
+/* Metriky jednoho člověka — STEJNÁ logika jako „Můj výkon": run-rate (projekce konce
+   měsíce), trend z historie, stabilita, readiness a primární akce. */
+function teamMetrics(u, ctx) {
+  const name = u.name;
+  const fill = parseFloat(u.asrHrsFill) || 0;        // poměr (1 = 100 %)
+  const share = parseFloat(u.shareASRServices) || 0;
+  const nps = parseFloat(u.cctNps) || 0;
+  const rev = (parseFloat(u.asistRevServices) || 0) + (parseFloat(u.asistRevProducts) || 0);
+  const attendance = parseFloat(u.attendance) || 0;
+  const asrTgt = parseFloat(u.asrHrsTarget) || 0;
+
+  // readiness (3 složky, renormalizováno — bez vratek)
+  const sFill = Math.max(0, Math.min(100, fill * 100));
+  const sShare = Math.max(0, Math.min(100, (share / 0.03) * 100));
+  const sNps = nps > 0 ? Math.max(0, Math.min(100, (nps / 5) * 100)) : 70;
+  const readiness = Math.round((sFill * 0.45 + sShare * 0.25 + sNps * 0.15) / 0.85);
+
+  // run-rate (vyžaduje docházku → plán hodin)
+  const docEmp = DATA.dochazka ? mvGetDochazkaEmployee(name) : null;
+  const planH = docEmp ? docEmp.planned : 0;
+  const monthTarget = planH * asrTgt;
+  const projRev = attendance > 0 ? rev * (planH / attendance) : rev;
+  const projFill = monthTarget > 0 ? projRev / monthTarget : null;   // null = nelze spočítat
+  const missingToFinish = monthTarget > 0 ? Math.max(monthTarget - projRev, 0) : 0;
+
+  // trend + stabilita z historie
+  const series = teamSeriesFill(name);
+  const td = mvTrendDirection(series.map((y, i) => ({ x: i, y })));
+  let stability = readiness;
+  if (series.length >= 2) {
+    const recent = series.slice(-3);
+    const lastFill = recent[recent.length - 1];
+    stability = Math.round(Math.max(0, Math.min(100, lastFill * 70 + (td.dir === 'up' ? 30 : td.dir === 'flat' ? 15 : 0))));
+  }
+
+  // primární akce (mirror priorit misí z „Můj výkon")
+  const avgShare = (ctx && ctx.avgShare) || 0;
+  let action;
+  if (fill < 0.75 && asrTgt > 0 && attendance > 0)
+    action = { key: 'unlock75', prio: 100, label: 'Dostat nad 75 % plnění', color: 'var(--red)' };
+  else if (avgShare > 0 && share < avgShare * 0.95 && rev > 0)
+    action = { key: 'services', prio: 80, label: 'Barvit zakázky službami', color: 'var(--yellow)' };
+  else if (fill >= 0.75 && fill < 1.0 && asrTgt > 0 && attendance > 0)
+    action = { key: 'to100', prio: 60, label: 'Dotáhnout plnění na 100 %', color: 'var(--yellow)' };
+  else if (nps > 0 && nps < 4)
+    action = { key: 'nps', prio: 55, label: 'Zapracovat na kvalitě (NPS)', color: 'var(--yellow)' };
+  else if (readiness >= 80)
+    action = { key: 'top', prio: 10, label: 'TOP forma — držet / mentor', color: 'var(--green)' };
+  else
+    action = { key: 'maintain', prio: 5, label: 'Udržovat výkon', color: 'var(--accent3)' };
+
+  const flags = {
+    belowFill: fill < 0.75,
+    belowShare: avgShare > 0 && share < avgShare * 0.95 && rev > 0,
+    lowNps: nps > 0 && nps < 4,
+    trendDown: td.dir === 'down',
+    runrateBelow: projFill != null && projFill < 1,
+    atRisk: stability < 60,
+    top: readiness >= 80,
+  };
+
+  return { name, branch: u.branch, fill, share, nps, rev, readiness, stability,
+           projFill, missingToFinish, td, series, action, flags };
+}
+
+function teamRender() {
+  const wrap = document.getElementById('team-result');
+  const people = teamPeople().filter(p => teamSelected.has(p.name));
+  document.getElementById('team-count').textContent = teamSelected.size ? `· vybráno ${teamSelected.size}` : '';
+
+  if (people.length === 0) {
+    wrap.innerHTML = `<div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:40px;text-align:center;color:var(--dim);font-size:14px;">
+      Zaškrtni aspoň jednoho člověka výše.</div>`;
+    return;
+  }
+
+  // průměr služeb v aktuální pobočce (pro „pod průměrem")
+  const branchPool = teamPeople().filter(p => (parseFloat(p.shareASRServices) || 0) > 0);
+  const avgShare = branchPool.length ? branchPool.reduce((s, p) => s + (parseFloat(p.shareASRServices) || 0), 0) / branchPool.length : 0;
+
+  let rows = people.map(u => teamMetrics(u, { avgShare }));
+
+  rows.sort((a, b) => {
+    let va, vb;
+    if (teamSortCol === 'trend') { va = a.td.slope; vb = b.td.slope; }
+    else if (teamSortCol === 'projFill') { va = a.projFill == null ? -1 : a.projFill; vb = b.projFill == null ? -1 : b.projFill; }
+    else { va = a[teamSortCol]; vb = b[teamSortCol]; }
+    if (typeof va === 'string') return teamSortDir * va.localeCompare(vb, 'cs');
+    return teamSortDir * ((va || 0) - (vb || 0));
+  });
+
+  const avg = k => rows.reduce((s, r) => s + (r[k] || 0), 0) / rows.length;
+  const med = k => { const v = rows.map(r => r[k] || 0).sort((x, y) => x - y); const m = Math.floor(v.length / 2); return v.length % 2 ? v[m] : (v[m - 1] + v[m]) / 2; };
+  const projAvg = (() => { const ok = rows.filter(r => r.projFill != null); return ok.length ? ok.reduce((s, r) => s + r.projFill, 0) / ok.length : null; })();
+
+  const fillC = f => f >= 1 ? 'var(--green)' : f >= 0.8 ? 'var(--yellow)' : 'var(--red)';
+  const rdC = r => r >= 80 ? 'var(--green)' : r >= 60 ? 'var(--accent3)' : r >= 40 ? 'var(--yellow)' : 'var(--red)';
+  const npsC = n => n >= 4 ? 'var(--green)' : n >= 3 ? 'var(--yellow)' : n > 0 ? 'var(--red)' : 'var(--dim)';
+  const stC = s => s >= 60 ? 'var(--green)' : s >= 40 ? 'var(--yellow)' : 'var(--red)';
+  const projC = p => p == null ? 'var(--dim)' : p >= 1 ? 'var(--green)' : p >= 0.85 ? 'var(--yellow)' : 'var(--red)';
+  const fmtKc = v => fmtN(Math.round(v)) + ' Kč';
+  const showBranch = (document.getElementById('team-branch-select').value === TEAM_ALL_BRANCHES);
+  const hasDoch = !!DATA.dochazka;
+  const arrow = c => teamSortCol === c ? (teamSortDir < 0 ? ' ↓' : ' ↑') : '';
+  const cnt = pred => rows.filter(pred).length;
+  const namesOf = pred => rows.filter(pred).map(r => r.name);
+  const plural = n => n === 1 ? 'člověk' : (n < 5 ? 'lidé' : 'lidí');
+
+  /* ── 1) SOUHRN VÝBĚRU ── */
+  const cards = [
+    { l: 'Lidí ve výběru', v: rows.length, c: 'var(--text)' },
+    { l: '⌀ Plnění', v: fmtPct(avg('fill')), c: fillC(avg('fill')) },
+    { l: '⌀ Run-rate', v: projAvg == null ? '—' : fmtPct(projAvg), c: projC(projAvg) },
+    { l: '⌀ Readiness', v: Math.round(avg('readiness')), c: rdC(avg('readiness')) },
+    { l: 'Pod 75 %', v: cnt(r => r.flags.belowFill), c: cnt(r => r.flags.belowFill) ? 'var(--red)' : 'var(--green)' },
+    { l: 'Rizikoví (<60)', v: cnt(r => r.flags.atRisk), c: cnt(r => r.flags.atRisk) ? 'var(--red)' : 'var(--green)' },
+    { l: 'TOP (≥80)', v: cnt(r => r.flags.top), c: cnt(r => r.flags.top) ? 'var(--green)' : 'var(--muted)' },
+  ];
+  const summaryHtml = `<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:1px;background:var(--border);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;margin-bottom:20px;">
+    ${cards.map(s => `<div style="padding:16px 18px;background:var(--surface);">
+      <div style="font-size:10px;text-transform:uppercase;letter-spacing:0.1em;color:var(--muted);font-weight:600;margin-bottom:8px;">${s.l}</div>
+      <div style="font-size:22px;font-weight:700;color:${s.c};letter-spacing:-0.02em;">${s.v}</div></div>`).join('')}
+  </div>`;
+
+  /* ── 2) AKČNÍ PŘEHLED NAD TÝMEM ── */
+  const buckets = [
+    { test: r => r.flags.belowFill, color: 'var(--red)', title: 'Pod 75 % plnění — nulová provize',
+      rec: 'Nejvyšší priorita. 1:1 ještě dnes, trénink otevření a zjišťování potřeb, denní mikro-cíl obratu.' },
+    { test: r => r.flags.atRisk && !r.flags.belowFill, color: 'var(--red)', title: 'Riziko poklesu (stabilita < 60)',
+      rec: 'Zjisti příčinu (motivace, zboží, směny). Častá krátká zpětná vazba a rychlé výhry.' },
+    { test: r => r.flags.runrateBelow && !r.flags.belowFill, color: 'var(--yellow)', title: 'Run-rate pod cílem do konce měsíce',
+      rec: 'Doháněcí plán: rozpočítej chybějící obrat na zbývající směny a kontroluj denně.' },
+    { test: r => r.flags.belowShare, color: 'var(--yellow)', title: 'Pod průměrem služeb',
+      rec: 'Společný nácvik navazování služeb k železu; cíl: služba u každé zakázky.' },
+    { test: r => r.flags.lowNps, color: 'var(--yellow)', title: 'Nízké CCT NPS (< 4)',
+      rec: 'Koučink kvality rozhovoru — tempo, naslouchání, jisté uzavření.' },
+    { test: r => r.flags.trendDown, color: 'var(--yellow)', title: 'Klesající trend výkonu',
+      rec: 'Porovnej s předchozími měsíci, pojmenuj zlom a naprav dřív, než se propíše do čísel.' },
+    { test: r => r.flags.top, color: 'var(--green)', title: 'TOP forma — využít',
+      rec: 'Pověř mentoringem slabších a předáváním best practice; nasaď náročnější cíle.' },
+  ];
+  const bucketHtml = buckets.map(b => {
+    const who = namesOf(b.test);
+    if (!who.length) return '';
+    return `<div style="border-left:3px solid ${b.color};background:var(--surface2);border-radius:6px;padding:12px 16px;margin-bottom:10px;">
+      <div style="display:flex;align-items:baseline;gap:8px;flex-wrap:wrap;margin-bottom:4px;">
+        <span style="font-weight:700;color:${b.color};font-size:13px;">${b.title}</span>
+        <span style="font-size:11px;color:var(--muted);">${who.length} ${plural(who.length)}</span>
+      </div>
+      <div style="font-size:12px;color:var(--text);margin-bottom:6px;">${who.join(', ')}</div>
+      <div style="font-size:12px;color:var(--muted);line-height:1.5;">↳ ${b.rec}</div>
+    </div>`;
+  }).join('');
+  const actionHtml = `<div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:18px 20px;margin-bottom:20px;">
+    <div class="section-title" style="margin-bottom:14px;">Akční přehled nad týmem</div>
+    ${bucketHtml || '<div style="color:var(--green);font-size:13px;">Žádné akutní problémy ve výběru — tým je v dobré kondici. Drž cíle a rozvoj.</div>'}
+  </div>`;
+
+  /* ── 3) DETAILNÍ SROVNÁVACÍ TABULKA ── */
+  const cols = [
+    { key: 'name', label: 'Jméno', align: 'left', sort: true, cell: r => `<span style="font-weight:600;color:var(--text);">${r.name}</span>`, foot: () => '<span style="color:var(--muted)">⌀ / medián</span>' },
+    showBranch ? { key: 'branch', label: 'Pobočka', align: 'left', sort: false, cell: r => `<span style="color:var(--muted);font-size:12px;">${r.branch || '—'}</span>`, foot: () => '' } : null,
+    { key: 'fill', label: 'Plnění', align: 'right', sort: true, cell: r => `<b style="color:${fillC(r.fill)}">${fmtPct(r.fill)}</b>`, foot: () => `<span style="color:var(--muted)">${fmtPct(avg('fill'))}</span><div style="font-size:10px;color:var(--dim);font-weight:600;">med ${fmtPct(med('fill'))}</div>` },
+    { key: 'trend', label: 'Trend', align: 'left', sort: true, cell: r => `${teamSparkline(r.series, r.td.color)}<div style="font-size:10px;color:${r.td.color};white-space:nowrap;margin-top:1px;">${trendShort(r.td)}</div>`, foot: () => '' },
+    { key: 'projFill', label: 'Run-rate', align: 'right', sort: true, cell: r => r.projFill == null ? `<span style="color:var(--dim);" title="Vyžaduje nahranou Docházku">—</span>` : `<b style="color:${projC(r.projFill)}">${fmtPct(r.projFill)}</b>`, foot: () => projAvg == null ? '<span style="color:var(--dim)">—</span>' : `<span style="color:var(--muted)">${fmtPct(projAvg)}</span>` },
+    { key: 'share', label: 'Share služeb', align: 'right', sort: true, cell: r => fmtPct(r.share), foot: () => `<span style="color:var(--muted)">${fmtPct(avg('share'))}</span>` },
+    { key: 'nps', label: 'CCT NPS', align: 'right', sort: true, cell: r => `<span style="color:${npsC(r.nps)}">${r.nps > 0 ? r.nps.toFixed(1).replace('.', ',') : '—'}</span>`, foot: () => `<span style="color:var(--muted)">${avg('nps') > 0 ? avg('nps').toFixed(1).replace('.', ',') : '—'}</span>` },
+    { key: 'rev', label: 'Asist. obrat', align: 'right', sort: true, cell: r => fmtKc(r.rev), foot: () => `<span style="color:var(--muted)">${fmtKc(avg('rev'))}</span>` },
+    { key: 'readiness', label: 'Readiness', align: 'right', sort: true, cell: r => `<b style="color:${rdC(r.readiness)}">${r.readiness}</b>`, foot: () => `<span style="color:var(--muted)">${Math.round(avg('readiness'))}</span>` },
+    { key: 'stability', label: 'Stabilita', align: 'right', sort: true, cell: r => `<span style="color:${stC(r.stability)}">${r.stability}</span>`, foot: () => `<span style="color:var(--muted)">${Math.round(avg('stability'))}</span>` },
+    { key: 'action', label: 'Primární akce', align: 'left', sort: false, cell: r => `<span style="color:${r.action.color};font-size:12px;white-space:nowrap;">● ${r.action.label}</span>`, foot: () => '' },
+  ].filter(Boolean);
+
+  const head = `<tr style="border-bottom:1px solid var(--border);">${cols.map(c =>
+    `<th ${c.sort ? `onclick="teamSort('${c.key}')" style="cursor:pointer;` : 'style="'}user-select:none;text-align:${c.align};padding:10px 12px;font-size:11px;text-transform:uppercase;letter-spacing:0.05em;color:var(--muted);white-space:nowrap;">${c.label}${c.sort ? arrow(c.key) : ''}</th>`).join('')}</tr>`;
+
+  const body = rows.map((r, i) => `<tr style="border-bottom:1px solid var(--border);${i % 2 ? 'background:var(--surface2);' : ''}">${cols.map(c =>
+    `<td style="padding:10px 12px;text-align:${c.align};vertical-align:middle;white-space:nowrap;">${c.cell(r)}</td>`).join('')}</tr>`).join('');
+
+  const footer = `<tr style="border-top:2px solid var(--border);font-weight:700;background:var(--surface);">${cols.map((c, idx) =>
+    `<td style="padding:11px 12px;text-align:${c.align};">${idx === 0 ? '<span style="color:var(--muted)">⌀ Průměr výběru</span>' : (c.foot ? c.foot() : '')}</td>`).join('')}</tr>`;
+
+  const tableHtml = `<div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;">
+      <div style="overflow-x:auto;">
+        <table style="width:100%;border-collapse:collapse;font-size:13px;">
+          <thead>${head}</thead><tbody>${body}${footer}</tbody>
+        </table>
+      </div>
+    </div>
+    <div style="font-size:11px;color:var(--dim);margin-top:12px;line-height:1.6;">
+      ${!hasDoch ? '⚠️ <b>Run-rate je prázdný</b> — vyžaduje i nahranou Docházku (plán hodin). Ostatní metriky fungují i bez ní.<br>' : ''}
+      <b>Run-rate</b> = projekce plnění na konec měsíce (aktuální obrat × plán hodin ÷ odpracováno, vůči měsíčnímu cíli) — stejně jako v „Můj výkon".
+      <b>Trend</b> a <b>Stabilita</b> se počítají z historie měsíců (tlačítko „Dodat data" v Můj výkon); bez 2+ měsíců se ukáže „—".
+      <b>Readiness</b> bez složky vratek (po lidech není čistě dostupná), tři složky renormalizované do 100 %. Klikem na hlavičku sloupce seřadíš.
+    </div>`;
+
+  wrap.innerHTML = summaryHtml + actionHtml + tableHtml;
+}
+
 /* ── Kohorta: medián a TOP-20 průměr ASR/Hrs Fill na pobočce ── */
 function mvCohortStats(branch) {
   const pool = (DATA.userPerf || [])
@@ -6731,20 +7070,53 @@ function mvCaptureCurrentMonth() {
 
 /* ── Lineární regrese pro směr trendu ── */
 function mvTrendDirection(points) {
-  // points: [{x: index, y: value}], vrací {slope, dir, label, color}
+  // points: [{x: index, y: value}] → {slope, dir, label, color, r2, n, confidence}
+  // Lineární regrese + R² + velikost vzorku → úroveň jistoty. Ze 2–3 bodů
+  // netvrdíme „Klesáš" s jistotou, ale „Spíš klesáš · orientačně".
+  const THRESHOLD_PP = 0.5;   // min. změna v p.b./měsíc, aby se mluvilo o směru
   const n = points.length;
-  if (n < 2) return { slope: 0, dir: 'flat', label: 'Málo dat', color: 'var(--muted)' };
-  const sx = points.reduce((s, p) => s + p.x, 0);
-  const sy = points.reduce((s, p) => s + p.y, 0);
-  const sxy = points.reduce((s, p) => s + p.x * p.y, 0);
-  const sxx = points.reduce((s, p) => s + p.x * p.x, 0);
-  const denom = n * sxx - sx * sx;
-  const slope = denom === 0 ? 0 : (n * sxy - sx * sy) / denom;
-  // slope je změna fill na měsíc; práh ±0.5 p.b. / měsíc
+  if (n < 2) return { slope: 0, dir: 'flat', label: 'Málo dat', color: 'var(--muted)', r2: 0, n, confidence: 'none' };
+
+  let sx = 0, sy = 0, sxx = 0, sxy = 0, syy = 0;
+  for (const p of points) { sx += p.x; sy += p.y; sxx += p.x * p.x; sxy += p.x * p.y; syy += p.y * p.y; }
+  const mx = sx / n, my = sy / n;
+  const ssxx = sxx - n * mx * mx;
+  const ssxy = sxy - n * mx * my;
+  const ssyy = syy - n * my * my;
+  const slope = ssxx === 0 ? 0 : ssxy / ssxx;
+  const intercept = my - slope * mx;
+  const r2 = (ssxx === 0 || ssyy === 0) ? 0 : (ssxy * ssxy) / (ssxx * ssyy);
+
+  // t-statistika sklonu — na změkčení tvrzení u malých vzorků
+  let sse = 0;
+  for (const p of points) { const yhat = intercept + slope * p.x; sse += (p.y - yhat) ** 2; }
+  const df = n - 2;
+  const seSlope = (df > 0 && ssxx > 0) ? Math.sqrt((sse / df) / ssxx) : Infinity;
+  const t = (isFinite(seSlope) && seSlope > 0) ? slope / seSlope : 0;
+
+  let confidence;
+  if (n === 2) confidence = 'low';                                           // dvěma body proložíš přímku vždy → nelze ověřit
+  else if (n >= 5 && r2 >= 0.5 && Math.abs(t) >= 2) confidence = 'high';
+  else if (n >= 4 && (r2 >= 0.3 || Math.abs(t) >= 1.5)) confidence = 'medium';
+  else confidence = 'low';
+
   const perMonthPP = slope * 100;
-  if (perMonthPP > 0.5) return { slope, dir: 'up', label: `Rosteš · +${perMonthPP.toFixed(1).replace('.',',')} p.b./měs`, color: 'var(--green)' };
-  if (perMonthPP < -0.5) return { slope, dir: 'down', label: `Klesáš · ${perMonthPP.toFixed(1).replace('.',',')} p.b./měs`, color: 'var(--red)' };
-  return { slope, dir: 'flat', label: 'Stabilní výkon', color: 'var(--yellow)' };
+  const dir = perMonthPP > THRESHOLD_PP ? 'up' : (perMonthPP < -THRESHOLD_PP ? 'down' : 'flat');
+  if (dir === 'flat') return { slope, dir: 'flat', label: 'Stabilní výkon', color: 'var(--yellow)', r2, n, confidence };
+
+  const mag = Math.abs(perMonthPP).toFixed(1).replace('.', ',');
+  const sign = dir === 'up' ? '+' : '−';
+  if (confidence === 'low') {
+    const soft = (dir === 'up' ? 'Spíš rosteš' : 'Spíš klesáš') + ` · ${sign}${mag} p.b./měs · orientačně (${n} měs.)`;
+    return { slope, dir, label: soft, color: 'var(--yellow)', r2, n, confidence };
+  }
+  const note = confidence === 'high' ? '' : ' · střední jistota';
+  return {
+    slope, dir,
+    label: (dir === 'up' ? 'Rosteš' : 'Klesáš') + ` · ${sign}${mag} p.b./měs` + note,
+    color: dir === 'up' ? 'var(--green)' : 'var(--red)',
+    r2, n, confidence
+  };
 }
 
 /* ════════════════════════════════════════════════════════════════════
@@ -6785,11 +7157,18 @@ function mvRender() {
   const curSluzby = parseFloat(u.asistRevServices) || 0;
   const curRev = curZeleze + curSluzby;
 
-  // --- Revenue split ---
-  const specialPeople = ['dominik blažek', 'milan surduk'];
-  const isSpecial = specialPeople.some(n => personName.toLowerCase().includes(n));
-  const pctSluzby = isSpecial ? 0.60 : 0.03;
-  const pctZelezo = isSpecial ? 0.40 : 0.97;
+  // --- Revenue split (rozpad obratu na železo/služby podle role) ---
+  // Vše na jednom místě, žádná jména v aplikační logice. Nový/odcházející
+  // člověk = jeden řádek v ROLE_SPLITS; jinak se použije DEFAULT_SPLIT.
+  const ROLE_SPLITS = {
+    'dominik blažek': { services: 0.60, iron: 0.40 },
+    'milan surduk':   { services: 0.60, iron: 0.40 },
+  };
+  const DEFAULT_SPLIT = { services: 0.03, iron: 0.97 };
+  const _ln = personName.toLowerCase();
+  const _splitKey = Object.keys(ROLE_SPLITS).find(k => _ln.includes(k));
+  const pctSluzby = _splitKey ? ROLE_SPLITS[_splitKey].services : DEFAULT_SPLIT.services;
+  const pctZelezo = _splitKey ? ROLE_SPLITS[_splitKey].iron : DEFAULT_SPLIT.iron;
 
   // --- Missing turnover ---
   const chybejiciAktualniObrat = curRev - (asrTgt * attendance);
@@ -6918,9 +7297,17 @@ function mvRender() {
 
   let alarmHtml;
   if (stabilityPct < 60) {
+    // Rizikový stav patří manažerovi, ne obchodníkovi → odložíme ho stranou
+    // (manažerský pohled / export to může číst). Klíč: localStorage 'p7_at_risk'.
+    try {
+      const atRisk = JSON.parse(localStorage.getItem('p7_at_risk') || '{}');
+      atRisk[personName] = { branch: mvBranch, stability: stabilityPct, ts: Date.now() };
+      localStorage.setItem('p7_at_risk', JSON.stringify(atRisk));
+    } catch (e) {}
+    // Obchodníkovi ukážeme povzbuzení, ne „riziko odchodu".
     alarmHtml = `<div class="mv-alarm">
       <div style="font-size:18px;">⚠️</div>
-      <div class="mv-alarm-txt"><b>Stability ${stabilityPct} %</b> — pod prahem 60 %. Riziko poklesu výkonu / odchodu.${stabilityNote} Doporučení: zarezervovat 1:1 s TL a zaměřit mise dne na rychlé výhry.</div>
+      <div class="mv-alarm-txt"><b>Stability ${stabilityPct} %</b> — tvůj výkon teď potřebuje nakopnout.${stabilityNote} Ber to jako signál, ne výtku: dej si dnešní misi jako prioritu a domluv si krátké 1:1 s týmleadem na rychlé výhry.</div>
     </div>`;
   } else {
     alarmHtml = `<div class="mv-alarm ok">
@@ -7075,6 +7462,31 @@ function mvRender() {
     const top20Cut = cohort.top20;
     const inTop20 = myFill >= top20Cut && top20Cut > 0;
     const vsMedian = myFill - cohort.median;
+    // ── Celofiremní kohorta (napříč VŠEMI pobočkami, ne jen aktuální) ──
+    const _gpool = (DATA.userPerf || [])
+      .filter(x => (parseFloat(x.attendance) || 0) > 0 && (parseFloat(x.asrHrsFill) || 0) > 0)
+      .map(x => ({ name: x.name, fill: parseFloat(x.asrHrsFill) || 0 }))
+      .sort((a, b) => b.fill - a.fill);
+    let gRows = '';
+    if (_gpool.length) {
+      const gVals = _gpool.map(r => r.fill);
+      const gMid = Math.floor(gVals.length / 2);
+      const gMedian = gVals.length % 2 ? gVals[gMid] : (gVals[gMid - 1] + gVals[gMid]) / 2;
+      const gT = Math.max(1, Math.round(gVals.length * 0.2));
+      const gTop20 = gVals.slice(0, gT).reduce((s, v) => s + v, 0) / gT;
+      const gRank = _gpool.findIndex(r => r.name === personName) + 1;
+      const gPct = gRank > 0 ? (1 - (gRank - 1) / _gpool.length) : 0;
+      const gInTop20 = myFill >= gTop20 && gTop20 > 0;
+      gRows = `
+      <div style="margin-top:14px;padding-top:12px;border-top:1px solid var(--border);">
+        <div style="font-size:10px;text-transform:uppercase;letter-spacing:0.1em;color:var(--muted);font-weight:600;margin-bottom:8px;">vs. celá firma</div>
+        <div class="mv-cohort-row"><span class="lbl">Pořadí (všichni aktivní)</span><span class="val">${gRank > 0 ? gRank + '. z ' + _gpool.length : '—'}</span></div>
+        <div class="mv-cohort-row"><span class="lbl">Percentil</span><span class="val">${gRank > 0 ? Math.round(gPct * 100) + '.' : '—'}</span></div>
+        <div class="mv-cohort-row"><span class="lbl">Medián firmy</span><span class="val">${fmtPct(gMedian)}</span></div>
+        <div class="mv-cohort-row"><span class="lbl">Průměr TOP 20 % firmy</span><span class="val" style="color:var(--accent3)">${fmtPct(gTop20)}</span></div>
+        ${gInTop20 ? '<div style="font-size:12px;color:var(--green);font-weight:700;margin-top:6px;">★ TOP 20 % v celé firmě</div>' : ''}
+      </div>`;
+    }
     const el = document.getElementById('mv-cohort');
     el.innerHTML = `
       <div class="mv-cohort-rank">
@@ -7090,7 +7502,7 @@ function mvRender() {
       <div class="mv-cohort-row"><span class="lbl">Moje ASR/Hrs Fill</span><span class="val" style="color:${level.color}">${fmtPct(myFill)}</span></div>
       <div class="mv-cohort-row"><span class="lbl">Medián pobočky</span><span class="val">${fmtPct(cohort.median)}</span></div>
       <div class="mv-cohort-row"><span class="lbl">Průměr TOP 20 %</span><span class="val" style="color:var(--accent3)">${fmtPct(cohort.top20)}</span></div>
-      <div class="mv-cohort-row"><span class="lbl">Rozdíl vůči mediánu</span><span class="val" style="color:${vsMedian>=0?'var(--green)':'var(--red)'}">${(vsMedian>=0?'+':'−')+fmtPct(Math.abs(vsMedian)).replace(' %','')} p.b.</span></div>`;
+      <div class="mv-cohort-row"><span class="lbl">Rozdíl vůči mediánu</span><span class="val" style="color:${vsMedian>=0?'var(--green)':'var(--red)'}">${(vsMedian>=0?'+':'−')+fmtPct(Math.abs(vsMedian)).replace(' %','')} p.b.</span></div>${gRows}`;
   })();
 
   /* ── chybějící obrat ── */
