@@ -1562,18 +1562,18 @@
   }
   .mv-hint-icon:hover, .mv-hint-icon:focus { color: var(--accent); outline: none; }
   .mv-hint-bubble {
-    position: absolute; bottom: calc(100% + 8px); right: 0;
+    position: absolute; top: calc(100% + 8px); right: 0;
     width: 264px; background: var(--surface3); color: var(--text);
     border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px;
     font-size: 11px; font-weight: 400; line-height: 1.5;
     text-transform: none; letter-spacing: normal; text-align: left;
     box-shadow: 0 8px 24px rgba(0,0,0,0.35);
-    opacity: 0; visibility: hidden; transform: translateY(4px);
-    transition: opacity 0.15s, transform 0.15s; z-index: 60; pointer-events: none;
+    opacity: 0; visibility: hidden; transform: translateY(-4px);
+    transition: opacity 0.15s, transform 0.15s; z-index: 120; pointer-events: none;
   }
   .mv-hint-bubble::after {
-    content: ''; position: absolute; top: 100%; right: 5px;
-    border: 6px solid transparent; border-top-color: var(--surface3);
+    content: ''; position: absolute; bottom: 100%; right: 5px;
+    border: 6px solid transparent; border-bottom-color: var(--surface3);
   }
   .mv-hint-icon:hover .mv-hint-bubble,
   .mv-hint-icon:focus .mv-hint-bubble { opacity: 1; visibility: visible; transform: translateY(0); }
@@ -6042,6 +6042,23 @@ function parseHourFrom(v) {
   return parseInt(String(v).match(/(\d{1,2})[-–]/)?.[1] ?? '0');
 }
 
+// Spočítá hodiny za měsíc z čistých (raw) řádků.
+// Každá obsazená buňka v časovém řádku = 1 hodina.
+//   occupied = konkrétní jména, free = volné směny (VOLNÁ…), planned = součet obou
+function brigoMonthHourStats(rows) {
+  let occupied = 0, free = 0;
+  for (const row of rows) {
+    if (!isTimeSlot(String(row[0] ?? '').trim())) continue;
+    for (let c = 1; c <= 6; c++) {
+      const cell = String(row[c] ?? '').trim();
+      if (!cell || cell === '0') continue;
+      if (cell.toUpperCase().startsWith('VOLNÁ') || cell.toUpperCase().startsWith('VOLNA')) free++;
+      else occupied++;
+    }
+  }
+  return { occupied, free, planned: occupied + free };
+}
+
 // Returns array of { date:{day,month,year}, name, position, timeFrom, timeTo, timeLabel }
 function brigoParseFull(rows) {
   const entries = [];
@@ -6316,12 +6333,13 @@ function brigoRender() {
       byDay[k].emps.push(e);
     }
     const days = Object.keys(byDay).sort();
-    const totalUnique = new Set(all.map(e=>e.name)).size;
+    const hourStats = brigoMonthHourStats(brigoCache[actual].raw);
 
     let html = `<div class="doch-stats">
       <div class="doch-stat"><div class="doch-stat-label">Měsíc</div><div class="doch-stat-value">${actual}</div></div>
       <div class="doch-stat"><div class="doch-stat-label">Dnů s brigošem</div><div class="doch-stat-value" style="color:var(--accent)">${days.length}</div></div>
-      <div class="doch-stat"><div class="doch-stat-label">Unikátních brigošů</div><div class="doch-stat-value" style="color:var(--accent2)">${totalUnique}</div></div>
+      <div class="doch-stat"><div class="doch-stat-label">Plánované hodiny</div><div class="doch-stat-value" style="color:var(--accent2)">${hourStats.planned} h</div></div>
+      <div class="doch-stat"><div class="doch-stat-label">Obsazené hodiny</div><div class="doch-stat-value" style="color:var(--green)">${hourStats.occupied} h</div></div>
     </div>`;
 
     for (const dk of days) {
